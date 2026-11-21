@@ -1,7 +1,7 @@
 <!doctype html><html lang="cs"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0a1219"><title>Apex GP · F1 z kokpitu</title>
 <style>
 *{box-sizing:border-box}html,body{overscroll-behavior:none}body{margin:0;background:#101a20;color:#fff;font:16px 'Segoe UI',Arial,sans-serif}button{font:inherit;color:inherit;cursor:pointer}button:focus-visible{outline:3px solid #fff;outline-offset:3px}canvas#world{position:fixed;inset:0;width:100%;height:100%}#menu{position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(20px,4vw,66px);background:linear-gradient(90deg,#051015db,transparent 75%),linear-gradient(0deg,#060e13 1%,transparent 63%)}header{font-weight:900;letter-spacing:.15em;font-style:italic}header b,.lime{color:#e2ff42}h1{margin:0;font:italic 950 clamp(60px,9vw,144px)/.84 'Arial Black',Arial,sans-serif;letter-spacing:-.085em}h1 span{display:block;color:#e2ff42}#hero{padding:3vh 0}.meta,small{font:700 12px/1.5 Consolas,monospace;letter-spacing:.13em;text-transform:uppercase}#hero p{font-weight:600}#selection{max-width:1080px}#cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:8px 0 15px}.card{position:relative;text-align:left;background:#111e26ec;border:1px solid #5e7178;border-radius:5px;min-height:100px;padding:14px;overflow:hidden}.card strong{display:block;font-size:clamp(16px,2vw,29px);letter-spacing:-.05em}.card svg{width:40%;height:76%;position:absolute;right:5%;top:12%;opacity:.8}.card[aria-pressed=true]{border:2px solid #e2ff42;background:#23312b}.primary{background:#dfff39;border:0;border-radius:3px;color:#122017;padding:12px 25px;font-weight:850}#hud{position:fixed;inset:0;pointer-events:none;padding:18px;display:flex;justify-content:space-between;align-items:flex-start}.plate,#pause{background:#0b141de6;color:white;border:1px solid #56696d;border-radius:4px;padding:8px 14px;font-weight:bold}.plate b{color:#ddff39}#pause,#touch button,#dialog button{pointer-events:auto}#speed{position:absolute;bottom:20px;right:20px;font:italic 900 42px Arial}#message,#dialog{position:fixed;top:38%;left:50%;transform:translate(-50%,-50%);text-align:center}#message{font:italic 900 clamp(46px,8vw,100px) Arial;text-shadow:0 3px 18px #142320}#dialog{top:50%;background:#0d1923f5;border:1px solid #677a80;padding:24px;border-radius:8px;width:min(90%,400px)}#dialog button{margin:5px}#touch{position:fixed;bottom:12px;left:12px;right:12px;display:none;justify-content:space-between}#touch button{background:#10202ce0;border:1px solid #91a0a5;border-radius:8px;min-width:48px;height:52px;touch-action:none;font-weight:800;user-select:none}#touch button:last-child{margin-left:5px}#touch .gas{color:#dfff39}[hidden]{display:none!important}@media(pointer:coarse){#touch{display:flex}#speed{bottom:78px;font-size:30px}}@media(max-width:650px){#cards{gap:5px}.card{min-height:102px;padding:7px;display:flex;flex-direction:column;justify-content:flex-end}.card svg{top:4%;height:49%;width:80%;right:10%}.meta,small{font-size:10px}#hud{padding:8px;gap:3px}.plate,#pause{padding:6px;font-size:13px}}@media(max-height:470px){#menu{padding:10px 22px}#hero{padding:2px}h1{font-size:48px}h1 span{display:inline}#hero p{margin:4px 0}.card{min-height:56px}#cards{margin:3px 0}.primary{padding:8px 16px}}
-#menu{isolation:isolate;background:#101719 url("assets/grid.jpg") center 48% / cover no-repeat;padding:clamp(18px,3vw,46px) clamp(18px,5.5vw,100px);gap:12px}#menu::before{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(90deg,#060c12b8,transparent 62%),linear-gradient(0deg,#070d14 4%,#0a1018d9 24%,transparent 65%)}#menu header{display:flex;align-items:center;gap:5px;font:italic 950 23px Arial;letter-spacing:-1.7px}#menu header b{color:#ff503a}.brandmark{transform:skew(-24deg);width:29px;height:14px;background:repeating-linear-gradient(90deg,#ff4837 0 6px,transparent 6px 9px);margin-right:5px}#hero{margin:auto 0;padding:2vh 0}#hero .meta{display:flex;align-items:center;gap:9px;color:#fff5e7}#hero .meta:before{content:"";width:26px;border-top:3px solid #ff4837}#hero h1{margin-top:12px;font:italic 950 clamp(65px,min(10vw,14vh),156px)/.77 'Arial Black',Arial,sans-serif;letter-spacing:-.09em;text-shadow:0 3px 32px #270e0829}#hero h1 em{color:#ff513a}#selection{max-width:1210px;width:100%;margin-inline:auto}.selecthead,.launch{display:flex;align-items:center;justify-content:space-between;gap:12px}.selecthead h2{margin:0;font-size:clamp(20px,2.4vw,34px);letter-spacing:-.045em}.selecthead span,.controls-help,.card small{color:#bdc5cb}.selecthead i{color:#f45441;margin:0 5px}#cards{gap:12px;margin:12px 0}.card{padding:14px 18px;border-radius:4px;background:#0d1820e8;border:1px solid #60717b;min-height:92px;transition:background .18s,border-color .18s}.card[aria-pressed=true]{padding:14px 18px;border:1px solid #ff6b55;box-shadow:inset 4px 0 #ff513a;background:#29232aef}.card[aria-pressed=true] small{color:#ffa58d}.card svg{width:38%;opacity:.95}.card strong{font-style:italic}.primary{background:#ff513a;color:#150d10;box-shadow:inset 0 1px #ff937e;font-size:17px;padding:14px 25px}.primary:hover{background:#ff755d}.launch p{font-size:15px;color:#e1e5e9;margin:0 0 4px}.controls-help{letter-spacing:.03em;font-size:12px;text-transform:none}.plate b{color:#ff977e}#speed{border-bottom:3px solid #ff513a}#hud .plate{background:linear-gradient(115deg,#101923f5,#16222bdd)}@media(max-width:650px){#menu{background-position:65% 42%;padding:20px 14px;gap:10px}.card,.card[aria-pressed=true]{padding:7px;min-height:94px}.card svg{width:80%}#cards{gap:6px}.launch{flex-wrap:wrap}.launch .primary{width:100%}.selecthead span{font-size:13px}.launch p{font-size:14px}#hero{margin:5vh 0 auto}}@media(max-height:490px) and (min-width:651px){#menu{padding:10px 4vw;gap:3px}#hero{padding:0}#hero h1{font-size:52px}#hero h1 br{display:none}#hero h1 em{padding-left:.15em}.card,.card[aria-pressed=true]{min-height:55px;padding:5px 14px}#cards{margin:4px 0}.launch .primary{padding:9px 15px}}</style><canvas id="world" aria-label="Závodní trať"></canvas><main id="menu"><header><span class="brandmark" aria-hidden="true"></span> APEX <b>GP</b></header><section id="hero"><div class="meta">Závodní víkend</div><h1>GRAND<br><em>PRIX</em></h1></section><section id="selection"><div class="selecthead"><h2>Výběr okruhu</h2><span>2 kola <i>/</i> 6 formulí</span></div><div id="cards"></div><div class="launch"><div><p id="description"></p><small class="controls-help">Šipky / WASD · na telefonu dotykové ovládání</small></div><button id="start" class="primary">Odstartovat závod</button></div></section></main><div id="hud" hidden><div class="plate" id="progress"></div><div class="plate" id="clock"></div><button id="pause">Pauza</button><div class="plate" id="speed"></div></div><div id="message"></div><div id="touch" hidden><div><button data-key="ArrowLeft" aria-label="Doleva">◀</button><button data-key="ArrowRight" aria-label="Doprava">▶</button></div><div><button data-key="ArrowDown">Brzda</button><button data-key="ArrowUp" class="gas">Plyn</button></div></div><section id="dialog" hidden><h2 id="heading"></h2><p id="result"></p><button id="resume" class="primary"></button><button id="restart" class="plate">Znovu od startu</button><button id="back" class="plate">Výběr tratí</button></section><!-- Circuit geometry adapted from github.com/bacinger/f1-circuits
+#menu{isolation:isolate;background:#101719 url("assets/grid.jpg") center 48% / cover no-repeat;padding:clamp(18px,3vw,46px) clamp(18px,5.5vw,100px);gap:12px}#menu::before{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(90deg,#060c12b8,transparent 62%),linear-gradient(0deg,#070d14 4%,#0a1018d9 24%,transparent 65%)}#menu header{display:flex;align-items:center;gap:5px;font:italic 950 23px Arial;letter-spacing:-1.7px}#menu header b{color:#ff503a}.brandmark{transform:skew(-24deg);width:29px;height:14px;background:repeating-linear-gradient(90deg,#ff4837 0 6px,transparent 6px 9px);margin-right:5px}#hero{margin:auto 0;padding:2vh 0}#hero .meta{display:flex;align-items:center;gap:9px;color:#fff5e7}#hero .meta:before{content:"";width:26px;border-top:3px solid #ff4837}#hero h1{margin-top:12px;font:italic 950 clamp(65px,min(10vw,14vh),156px)/.77 'Arial Black',Arial,sans-serif;letter-spacing:-.09em;text-shadow:0 3px 32px #270e0829}#hero h1 em{color:#ff513a}#selection{max-width:1210px;width:100%;margin-inline:auto}.selecthead,.launch{display:flex;align-items:center;justify-content:space-between;gap:12px}.selecthead h2{margin:0;font-size:clamp(20px,2.4vw,34px);letter-spacing:-.045em}.selecthead span,.controls-help,.card small{color:#bdc5cb}.selecthead i{color:#f45441;margin:0 5px}#cards{gap:12px;margin:12px 0}.card{padding:14px 18px;border-radius:4px;background:#0d1820e8;border:1px solid #60717b;min-height:92px;transition:background .18s,border-color .18s}.card[aria-pressed=true]{padding:14px 18px;border:1px solid #ff6b55;box-shadow:inset 4px 0 #ff513a;background:#29232aef}.card[aria-pressed=true] small{color:#ffa58d}.card svg{width:38%;opacity:.95}.card strong{font-style:italic}.primary{background:#ff513a;color:#150d10;box-shadow:inset 0 1px #ff937e;font-size:17px;padding:14px 25px}.primary:hover{background:#ff755d}.launch p{font-size:15px;color:#e1e5e9;margin:0 0 4px}.controls-help{letter-spacing:.03em;font-size:12px;text-transform:none}.plate b{color:#ff977e}#speed{border-bottom:3px solid #ff513a}#hud .plate{background:linear-gradient(115deg,#101923f5,#16222bdd)}@media(max-width:650px){#menu{background-position:65% 42%;padding:20px 14px;gap:10px}.card,.card[aria-pressed=true]{padding:7px;min-height:94px}.card svg{width:80%}#cards{gap:6px}.launch{flex-wrap:wrap}.launch .primary{width:100%}.selecthead span{font-size:13px}.launch p{font-size:14px}#hero{margin:5vh 0 auto}}@media(max-height:490px) and (min-width:651px){#menu{padding:10px 4vw;gap:3px}#hero{padding:0}#hero h1{font-size:52px}#hero h1 br{display:none}#hero h1 em{padding-left:.15em}.card,.card[aria-pressed=true]{min-height:55px;padding:5px 14px}#cards{margin:4px 0}.launch .primary{padding:9px 15px}}#radar{position:absolute;left:18px;bottom:18px;width:clamp(88px,12vw,155px);background:#0c1722ae;border-radius:5px}.raceButtons{display:flex;gap:5px}.raceButtons button{pointer-events:auto;background:#101c29da;border:1px solid #637078;color:white;border-radius:4px;padding:8px;font-weight:650}.plate small{display:block;color:#ced7dc;font:600 10px/1.4 monospace;letter-spacing:.1em}.plate output{color:#ff775e}#clock{font-variant-numeric:tabular-nums}#speed{min-width:160px;font-variant-numeric:tabular-nums;text-align:right}#speed i{font-size:.52em;font-style:normal;color:#ff9873;float:left;padding:8px 10px 0 0}#engineer{position:absolute;left:50%;top:14%;transform:translateX(-50%);background:#0c1821de;color:#ffe5ab;border-radius:3px;padding:6px 12px;font-weight:750;text-align:center;font-size:14px}#engineer:empty{display:none}.lights{display:flex;gap:6px;padding:10px;background:#141b20;border-radius:8px;box-shadow:0 4px 20px #0006}.lights i{width:clamp(20px,4vw,43px);aspect-ratio:1;border-radius:50%;background:#372526}.lights i.lit{background:#ff4134;box-shadow:0 0 18px #ff39247a}#message:empty{display:none}@media(pointer:coarse){#radar{bottom:77px}}@media(max-width:600px){.raceButtons{flex-direction:column}.raceButtons button{padding:4px 7px;font-size:12px}#speed{min-width:110px}#engineer{top:16%;font-size:12px}#radar{left:8px}} </style><canvas id="world" aria-label="Závodní trať"></canvas><main id="menu"><header><span class="brandmark" aria-hidden="true"></span> APEX <b>GP</b></header><section id="hero"><div class="meta">Závodní víkend</div><h1>GRAND<br><em>PRIX</em></h1></section><section id="selection"><div class="selecthead"><h2>Výběr okruhu</h2><span>2 kola <i>/</i> 6 formulí</span></div><div id="cards"></div><div class="launch"><div><p id="description"></p><small class="controls-help">Šipky / WASD · na telefonu dotykové ovládání</small></div><button id="start" class="primary">Odstartovat závod</button></div></section></main><div id="hud" hidden><div class="plate" id="progress"></div><div class="plate" id="clock"></div><div class="raceButtons"><button id="audio" aria-pressed="true">Zvuk</button><button id="pause">Pauza</button></div><canvas id="radar" width="160" height="108" aria-label="Mapa okruhu s polohou vozů"></canvas><div id="engineer"></div><div class="plate" id="speed"></div></div><div id="message"></div><div id="touch" hidden><div><button data-key="ArrowLeft" aria-label="Doleva">◀</button><button data-key="ArrowRight" aria-label="Doprava">▶</button></div><div><button data-key="ArrowDown">Brzda</button><button data-key="ArrowUp" class="gas">Plyn</button></div></div><section id="dialog" hidden><h2 id="heading"></h2><p id="result"></p><button id="resume" class="primary"></button><button id="restart" class="plate">Znovu od startu</button><button id="back" class="plate">Výběr tratí</button></section><!-- Circuit geometry adapted from github.com/bacinger/f1-circuits
 Copyright (c) 2019-2025 Tomislav Bacinger
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -43,16 +43,10 @@ function resetHandling(){lateralSpeed=0;bodyYaw=0;cameraLane=0}
 
 function mapSVG(points){let xs=points.map(p=>p[0]),ys=points.map(p=>-p[1]),minX=Math.min(...xs),minY=Math.min(...ys),w=Math.max(...xs)-minX,h=Math.max(...ys)-minY;return '<svg aria-hidden="true" viewBox="'+[minX-100,minY-100,w+200,h+200].join(' ')+'"><polyline fill="none" stroke="#c7e9dd" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round" points="'+points.map(p=>[p[0],-p[1]].join(',')).join(' ')+'"/></svg>'}
 tracks.forEach(([name,country],i)=>{let b=document.createElement('button');b.className='card';b.innerHTML=mapSVG(raw[i])+'<small>'+country+'</small><strong>'+name+'</strong>';b.onclick=()=>select(i);$('cards').append(b)});
-function select(i){resetHandling();track=i;geometry(i);dist=0;lane=0;steer=0;rivals=[];$('description').textContent=tracks[i][2];[...$('cards').children].forEach((b,n)=>b.setAttribute('aria-pressed',n===i))}
+function select(i){resetHandling();track=i;geometry(i);dist=0;lane=0;steer=0;rivals=[];$('description').textContent=tracks[i][2]+' '+['Monza při západu slunce.','Noční závod pod lampami.','Déšť a nižší přilnavost.'][i];[...$('cards').children].forEach((b,n)=>b.setAttribute('aria-pressed',n===i))}
 function size(){W=innerWidth;H=innerHeight;let d=Math.min(devicePixelRatio||1,1.7);canvas.width=Math.round(W*d);canvas.height=Math.round(H*d);g.setTransform(d,0,0,d,0,0)}onresize=size;size();
 function poly(color,...pts){g.fillStyle=color;g.beginPath();g.moveTo(...pts[0]);for(let i=1;i<pts.length;i++)g.lineTo(...pts[i]);g.closePath();g.fill()}
 function gradient(y,end,stops){let grad=g.createLinearGradient(0,y,0,end);stops.forEach(([p,c])=>grad.addColorStop(p,c));return grad}
-function landscape(){
- let night=track===1,spa=track===2;g.fillStyle=gradient(0,horizon+30,[[0,night?'#182940':spa?'#678fa9':'#528ba6'],[.7,night?'#98627d':spa?'#b1d1d7':'#b9d7d7'],[1,night?'#ffb787':spa?'#e2e3c9':'#ffdfb0']]);g.fillRect(0,0,W,H);
- let sunX=W*.74,sunY=horizon*.65,glow=g.createRadialGradient(sunX,sunY,3,sunX,sunY,H*.31);glow.addColorStop(0,'#fff4cbbb');glow.addColorStop(1,'#ffe7b000');g.fillStyle=glow;g.fillRect(0,0,W,horizon+20);g.fillStyle='#fff2c9';g.beginPath();g.arc(sunX,sunY,H*.021,0,7);g.fill();
- for(let j=0;j<3;j++){let ridge=[[0,horizon+12]];for(let x=0;x<=W+8;x+=8){let t=x/(H*.8)+j*17+Math.sin(dist/850)*.6;ridge.push([x,horizon-H*(.035+.023*Math.sin(t*4)+.019*Math.cos(t*9)+.008*Math.sin(t*20))*(spa?2.4:1)+j*4])}ridge.push([W+8,horizon+14]);poly(['#99a9a2','#718c87','#527670'][j],...ridge)}
- g.fillStyle=night?'#4c7481':spa?'#527548':'#6d8051';g.fillRect(0,horizon+7,W,H);
-}
 function car(x,y,s,paint,tilt=0,wheel=0){
  g.save();g.translate(x,y);g.scale(s,s);g.transform(1,tilt*.075,-tilt,1,0,0);
  const p=(c,...a)=>poly(c,...a);g.fillStyle='#11192166';g.beginPath();g.ellipse(0,-2,91,15,0,0,7);g.fill();
@@ -149,16 +143,34 @@ function cockpit(){
  g.strokeStyle='#161b20';g.lineWidth=.048;g.beginPath();g.moveTo(-.34,.04);g.bezierCurveTo(-.26,-.09,-.09,-.149,0,-.15);g.bezierCurveTo(.09,-.149,.26,-.09,.34,.04);g.stroke();
  g.strokeStyle='#60686b';g.lineWidth=.004;g.stroke();strut(0,-.14,0,-.263,.018,'#252a30');g.restore()
 }
+function mirrors(){
+ const scale=Math.min(W*.57,H*.81);
+ g.save();g.translate(W*.5+bodyYaw*scale*.065,H+1);g.scale(scale,scale);
+ for(const side of [-1,1]){
+ const x=side*.37,y=-.17,w=.103,ht=.040;
+ g.strokeStyle='#202730';g.lineWidth=.010;g.beginPath();g.moveTo(side*.22,-.065);g.lineTo(x,y);g.stroke();
+ g.fillStyle='#902a27';g.beginPath();g.roundRect(x-w*.5-.004,y-ht*.5-.005,w+.008,ht+.01,.011);g.fill();
+ g.save();g.beginPath();g.roundRect(x-w*.5,y-ht*.5,w,ht,.007);g.clip();
+ g.fillStyle=track===1?'#434c64':'#afc4ca';g.fillRect(x-w/2,y-ht/2,w,ht);
+ g.fillStyle='#526450';g.fillRect(x-w/2,y-ht*.15,w,ht);
+ poly('#666a6e',[x-.006,y-.005],[x+.007,y-.005],[x+w*.4,y+ht/2],[x-w*.45,y+ht/2]);
+ for(const r of rivals){const behind=dist-r.d;if(behind<1||behind>60||side*(r.l-lane)<-.15)continue;const size=.06/(1+behind*.15);
+ g.fillStyle=r.c;g.fillRect(x+(r.l-lane)*w*.24-size*.5,y,size,size*.43)}
+ g.restore()
+ }
+ g.restore()
+}
 function opponent(x,y,s,r){
  if(!rearView.complete||!rearView.naturalWidth){car(x,y,s*.021,r.c);return}
  const width=s*2.05,height=width*rearView.naturalHeight/rearView.naturalWidth;
  g.fillStyle='#17191c66';g.beginPath();g.ellipse(x,y,width*.52,height*.14,0,0,7);g.fill();
- g.drawImage(rearView,x-width/2,y-height,width,height);
+ g.drawImage(teamCar(r)||rearView,x-width/2,y-height,width,height);
+ if(track===2&&s>.9){g.save();g.globalAlpha=.21;g.drawImage(plume,x-width*.86,y-height*.3,width*1.72,height*.57);g.restore()}
  g.fillStyle=r.c;g.fillRect(x-width*.18,y-height*.38,width*.36,Math.max(1,height*.038))
 }
 function hill(s){if(track!==2)return 0;let f=mod(s,length)/length;return 18*Math.sin(f*6.283)+14*Math.tanh((f-.13)*55)-14*Math.tanh((f-.36)*15)+5*Math.sin(f*25.13)}
 function draw(){
- horizon=H*.43;landscape();let focal=Math.min(W*.88,H*1.07),base=W*(.5-bodyYaw*.15),roadWidth=track===1?5.8:8,step=5,offset=mod(dist,step),samples=[],bend=0,bx=0,camHill=hill(dist),fraction=mod(dist,length)/length,tunnel=track===1&&fraction>.43&&fraction<.56;
+ horizon=H*(.43+Math.sin(dist*.46)*Math.min(speed/90,1)*.0009);sky();let focal=Math.min(W*.88,H*1.07),base=W*(.5-bodyYaw*.15),roadWidth=track===1?5.8:8,step=5,offset=mod(dist,step),samples=[],bend=0,bx=0,camHill=hill(dist),fraction=mod(dist,length)/length,tunnel=track===1&&fraction>.43&&fraction<.56;
  // Anchor road markings to the circuit and always keep a near clipping plane.
  const firstPlane=step-offset, rivalDepths=rivals.map(r=>({r,z:mod(r.d-dist,length)}));
  let previousZ=1;
@@ -173,7 +185,7 @@ function draw(){
  }
  for(let i=samples.length-1;i>0;i--){let a=samples[i],b=samples[i-1],n=b.n;const band=(lo,hi,c)=>poly(c,[a.x+lo*a.s,a.y],[a.x+hi*a.s,a.y],[b.x+hi*b.s,b.y+.6],[b.x+lo*b.s,b.y+.6]);
  band(-roadWidth-1,roadWidth+1,Math.floor(n/2)%2?'#bc463b':'#e3dfd4');
- roadSurface(a,b,roadWidth);
+ roadSurface(a,b,roadWidth);trackDetails(a,b,band,roadWidth,n);
  for(const side of [-1,1]){
  const k=side*(roadWidth-.16);band(k-.055,k+.055,'#ebe8da');
  if(i>1&&mod(n,4)===0)realScenery(b.x+side*(roadWidth+6+mod(n,3))*b.s,b.y,b.s,n,side);
@@ -186,36 +198,174 @@ function draw(){
  }
  }
  if(tunnel){g.fillStyle=gradient(0,horizon,[[0,'#0a1119'],[.8,'#26313a'],[1,'#48515a']]);g.fillRect(0,0,W,horizon*.85);for(let i=1;i<8;i++){let t=mod(i+dist/28,8)/8;g.fillStyle='#ffeac0';g.fillRect(W*(.5-.49*t),horizon*(.86-.9*t),3+t*17,1+4*t)}}
- cockpit()
+ if(track===1){g.fillStyle='#131c4536';g.fillRect(0,horizon,W,H-horizon)}
+ rain();cockpit();mirrors()
 }
 
-function start(){if(state!=='menu'&&state!=='finish'&&state!=='pause')return;resetHandling();state='count';dist=0;speed=0;lane=0;steer=0;elapsed=0;guard=0;count=3;keys.clear();rivals=colors.map((c,i)=>({c,d:16+i*16,l:(i%2?.46:-.46),v:0,pace:57+i*2}));$('menu').hidden=true;$('hud').hidden=false;$('touch').hidden=false;$('dialog').hidden=true;updateHud()}
-function ranking(){return 1+rivals.filter(r=>r.d>dist).length}
+let gear=1,rpm=0,loadOnEngine=0,draft=0,lapStart=0,lapTimes=[],bestLap=0,lapFlash=0;
+const gearLimits=[0,16,27,39,51,62,73,84,96];
+function transmission(dt,throttle){
+ if(gear<8&&speed>gearLimits[gear])gear++;
+ if(gear>1&&speed<gearLimits[gear-1]-1.6)gear--;
+ const range=gearLimits[gear]-gearLimits[gear-1];
+ rpm=limit((gear===1?.25:.60)+(gear===1?.75:.40)*(speed-gearLimits[gear-1])/range,.18,1);
+ loadOnEngine=mix(loadOnEngine,throttle?1:.12,1-Math.exp(-dt*8))
+}
+let audioRig=null,muted=false;
+try{muted=localStorage.getItem('apex-muted')==='1'}catch{}
+function primeAudio(){
+ if(muted)return;
+ try{
+ if(!audioRig){
+ const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+ const ctx=new AC(),gain=ctx.createGain(),filter=ctx.createBiquadFilter(),motor=ctx.createOscillator(),harmonic=ctx.createOscillator(),blend=ctx.createGain();
+ gain.gain.value=0;filter.type='lowpass';motor.type='sawtooth';harmonic.type='triangle';blend.gain.value=.28;
+ motor.connect(filter);harmonic.connect(blend);blend.connect(filter);filter.connect(gain);gain.connect(ctx.destination);
+ const noise=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate),channel=noise.getChannelData(0);
+ for(let i=0;i<channel.length;i++)channel[i]=Math.random()*2-1;
+ const wind=ctx.createBufferSource(),tone=ctx.createBiquadFilter(),air=ctx.createGain();
+ wind.buffer=noise;wind.loop=true;tone.type='bandpass';tone.frequency.value=1400;air.gain.value=0;wind.connect(tone);tone.connect(air);air.connect(ctx.destination);
+ motor.start();harmonic.start();wind.start();audioRig={ctx,motor,harmonic,filter,gain,air}
+ }audioRig.ctx.resume().catch(()=>{})
+ }catch{}
+}
+function mixAudio(){
+ if(!audioRig)return;const {ctx,motor,harmonic,filter,gain,air}=audioRig,t=ctx.currentTime;
+ const live=!muted&&(state==='race'||state==='count'),freq=53+rpm*207;
+ motor.frequency.setTargetAtTime(freq,t,.029);harmonic.frequency.setTargetAtTime(freq*2.006,t,.025);
+ filter.frequency.setTargetAtTime(470+rpm*1800+loadOnEngine*1300,t,.06);
+ gain.gain.setTargetAtTime(live?.018+.027*loadOnEngine:0,t,.045);
+ air.gain.setTargetAtTime(live?.035*(speed/91)**2+(track===2?.009:0):0,t,.1)
+}
+function toggleAudio(){muted=!muted;if(!muted)primeAudio();try{localStorage.setItem('apex-muted',muted?'1':'0')}catch{}soundLabel();mixAudio()}
+function soundLabel(){const b=$('audio');b.textContent=muted?'Zvuk vypnutý':'Zvuk zapnutý';b.setAttribute('aria-pressed',String(!muted))}
+$('audio').onclick=toggleAudio;soundLabel();
+function readBest(){try{return Number(localStorage.getItem('apex-fastest-'+track))||0}catch{return 0}}
+function crossLine(at){
+ const time=at-lapStart;lapStart=at;lapTimes.push(time);lapFlash=3.6;
+ if(!bestLap||time<bestLap){bestLap=time;try{localStorage.setItem('apex-fastest-'+track,String(time))}catch{}}
+}
+function upcomingCorner(s){
+ let strongest=0,distance=0;
+ for(let ahead=12;ahead<=160;ahead+=12){const c=turn(s+ahead);if(Math.abs(c)>Math.abs(strongest)){strongest=c;distance=ahead}}
+ return {curve:strongest,distance}
+}
+function raceOpponents(dt){
+ let inTow=0;const traffic=[...rivals,{d:dist,l:lane,v:speed}];
+ for(const [i,r] of rivals.entries()){
+ if(r.finished)continue;
+ const corner=turn(r.d+Math.max(18,r.v*.75)),next=turn(r.d+12);
+ let desired=limit((Math.abs(next)>.006?Math.sign(next)*.47:-Math.sign(corner)*.35)+.15*Math.sin(r.d/100+i),-.75,.75);
+ let speedCap=r.pace/(1+Math.abs(corner)*(track===2?25:18));
+ for(const other of traffic){if(other===r||other.finished)continue;
+ const gap=other.d-r.d;
+ if(gap>0&&gap<25&&Math.abs(other.l-r.l)<.47){
+ desired=other.l>.05?-.72:other.l<-.05?.72:(i%2?.72:-.72);
+ if(gap<9)speedCap=Math.min(speedCap,other.v+1)
+ }}
+ r.l+=limit(desired-r.l,-dt*.72,dt*.72);r.v+=limit(speedCap-r.v,-31*dt,13*dt);r.d+=r.v*dt;
+ if(r.d>=length*2){r.finished=true;continue}
+ const gap=r.d-dist;
+ if(gap>2&&gap<34&&Math.abs(r.l-lane)<.38)inTow=Math.max(inTow,1-gap/36);
+ if(guard<=0&&Math.abs(gap)<3.5&&Math.abs(r.l-lane)<.25){speed*=.77;lateralSpeed+=(lane>=r.l?1:-1)*1.05;guard=1}
+ }
+ draft=mix(draft,inTow,1-Math.exp(-dt*3))
+}
+const plume=surface(80,32);{const c=plume.getContext('2d');c.scale(2.5,1);const grad=c.createRadialGradient(16,16,0,16,16,16);grad.addColorStop(0,'#e1e5e7');grad.addColorStop(1,'#dde1e200');c.fillStyle=grad;c.fillRect(0,0,32,32)}
+const skyCache=new Map();
+function atmosphere(){
+ if(skyCache.has(track))return skyCache.get(track);
+ const img=surface(960,272),c=img.getContext('2d'),rnd=seeded(367+track);
+ const colors=[['#518caf','#c5cfc4','#ffd990'],['#081328','#252f52','#85667b'],['#364b5a','#99a6ad','#c8c9c1']][track],bg=c.createLinearGradient(0,0,0,272);
+ colors.forEach((v,i)=>bg.addColorStop(i/2,v));c.fillStyle=bg;c.fillRect(0,0,960,272);
+ for(let i=0;i<(track===2?190:70);i++){const x=rnd()*1040-40,y=rnd()*185,w=10+rnd()*65; c.save();c.translate(x,y);c.scale(w,track===2?w*.32:w*.14);let f=c.createRadialGradient(0,0,0,0,0,1);f.addColorStop(0,track===2?'#2336462e':'#f9ebe81a');f.addColorStop(1,'#ffffff00');c.fillStyle=f;c.fillRect(-1,-1,2,2);c.restore()}
+ if(track!==2){let x=710,y=128,glow=c.createRadialGradient(x,y,0,x,y,100);glow.addColorStop(0,track===0?'#fff1bded':'#e1eaff53');glow.addColorStop(1,'#ffe1a000');c.fillStyle=glow;c.fillRect(x-100,y-100,200,200);c.fillStyle=track===0?'#ffffda':'#e4eafb';c.beginPath();c.arc(x,y,track===0?9:4,0,7);c.fill()}
+ for(let layer=0;layer<3;layer++){c.fillStyle=(track===1?['#4d5269','#3f465d','#2c3549']:track===2?['#89979c','#6d807e','#536961']:['#acb3a3','#879d88','#607f70'])[layer];c.beginPath();c.moveTo(0,272);for(let x=0;x<965;x+=3){const hill=10+7*Math.sin(x*.012+layer*1.9)+4*Math.cos(x*.038+layer);c.lineTo(x,245-hill*(track===2?2.1:1)+layer*7-rnd()*2)}c.lineTo(963,272);c.fill()}
+ if(track===1){for(let x=0;x<960;x+=9){let h=4+rnd()*26;c.fillStyle='#293046';c.fillRect(x,265-h,8,h);for(let y=266-h;y<261;y+=4)if(rnd()>.32){c.fillStyle='#e4bd86';c.fillRect(x+2,y,1.4,1.3);c.fillRect(x+5,y,1.4,1.3)}}}
+ skyCache.set(track,img);return img
+}
+function sky(){
+ g.fillStyle=['#778659','#354956','#5a7055'][track];g.fillRect(0,0,W,H);
+ const shift=Math.sin(dist/690)*W*.045;
+ g.drawImage(atmosphere(),-W*.07+shift,0,W*1.14,horizon+9)
+}
+const rainSeeds=Array.from({length:66},(_,i)=>({x:((i*307)%997)/997,y:((i*281)%587)/587}));
+function rain(){
+ if(track!==2)return;
+ g.save();g.strokeStyle='#e1edf359';g.lineWidth=.95;g.beginPath();
+ const t=elapsed+(3-Math.max(0,count));
+ for(const p of rainSeeds){let x=mod(p.x*W+t*(22+speed*.6),W),y=mod(p.y*H+t*(182+p.x*110+speed),H);g.moveTo(x,y);g.lineTo(x+2.5+bodyYaw*7,y+4+p.x*7)}g.stroke();g.restore()
+}
+const liveries=new Map();
+function teamCar(r){
+ if(!rearView.complete||!rearView.naturalWidth)return null;
+ if(liveries.has(r.c))return liveries.get(r.c);
+ const tex=surface(320,Math.round(320*rearView.naturalHeight/rearView.naturalWidth)),ctx=tex.getContext('2d');ctx.drawImage(rearView,0,0,tex.width,tex.height);
+ const pixels=ctx.getImageData(0,0,tex.width,tex.height),buf=pixels.data,color=parseInt(r.c.slice(1),16);
+ for(let i=0;i<buf.length;i+=4){let red=buf[i],green=buf[i+1],blue=buf[i+2],excess=red-Math.max(green,blue);if(excess<12||!buf[i+3])continue;const w=Math.min(1,excess/52),shade=red/255;
+ for(let j=0;j<3;j++)buf[i+j]=mix(buf[i+j],Math.min(255,(color>>(16-j*8)&255)*shade+Math.min(green,blue)*.22),w)}
+ ctx.putImageData(pixels,0,0);liveries.set(r.c,tex);return tex
+}
+function trackDetails(a,b,band,width,n){
+ const bend=turn(dist+b.z),wet=track===2;
+ if(wet){band(-width,width,'#a9bfd21b');if(n%9===1)band(-width*.62,-width*.33,'#c5d7dd38')}
+ const side=Math.sign(bend),offset=side*Math.min(width*.48,Math.abs(bend)*width*16);
+ if(Math.abs(bend)>.003){band(offset-.95,offset-.68,'#16191c2c');band(offset+.68,offset+.95,'#16191c2c')}
+ if(n%8!==0||b.z<4||b.z>200)return;
+ if(track===1){
+ const s=b.s,x=b.x-(width+3)*s,y=b.y,ht=6*s;
+ g.fillStyle='#53616c';g.fillRect(x,y-ht,.09*s,ht);g.fillStyle='#ffe8a5';g.fillRect(x-.35*s,y-ht,1.3*s,.16*s);
+ const glow=g.createRadialGradient(x,y-ht,0,x,y-ht,1.4*s);glow.addColorStop(0,'#ffde932e');glow.addColorStop(1,'#ffe28e00');g.fillStyle=glow;g.fillRect(x-1.4*s,y-ht-1.4*s,2.8*s,2.8*s)
+ }
+}
+function circuitDisplay(){
+ const cv=$('radar'),ctx=cv.getContext('2d'),pts=raw[track],w=cv.width,h=cv.height;
+ ctx.clearRect(0,0,w,h);let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+ for(const [x,y] of pts){minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y)}
+ const z=Math.min((w-18)/(maxX-minX),(h-16)/(maxY-minY)),px=x=>(w-(maxX-minX)*z)/2+(x-minX)*z,py=y=>(h-(maxY-minY)*z)/2+(maxY-y)*z;
+ ctx.lineJoin='round';ctx.beginPath();let sum=0;const marks=[];
+ for(let i=0;i<pts.length;i++){const p=pts[i],next=pts[(i+1)%pts.length];if(i===0)ctx.moveTo(px(p[0]),py(p[1]));else ctx.lineTo(px(p[0]),py(p[1]));const len=Math.hypot(next[0]-p[0],next[1]-p[1]);if(len)marks.push([sum,len,p,next]);sum+=len}
+ ctx.closePath();ctx.strokeStyle='#d5e1e5';ctx.lineWidth=2;ctx.stroke();
+ for(const car of [...rivals,{d:dist,c:'#ff542f',player:true}]){let s=mod(car.d,length)*sum/length;const m=marks.find(a=>a[0]+a[1]>s)||marks[0],t=(s-m[0])/m[1];ctx.beginPath();ctx.arc(px(mix(m[2][0],m[3][0],t)),py(mix(m[2][1],m[3][1],t)),car.player?5:2.8,0,7);ctx.fillStyle=car.c;ctx.fill();if(car.player){ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.stroke()}}
+}
+
+function start(){if(state!=='menu'&&state!=='finish'&&state!=='pause')return;resetHandling();primeAudio();nextInfoAt=0;gear=1;rpm=.22;draft=0;lapStart=0;lapFlash=0;lapTimes=[];bestLap=readBest();state='count';dist=0;speed=0;lane=0;steer=0;elapsed=0;guard=0;count=3;$('message').dataset.lamps='';keys.clear();rivals=colors.map((c,i)=>({c,d:16+i*16,l:(i%2?.46:-.46),v:0,pace:57+i*2}));$('menu').hidden=true;$('hud').hidden=false;$('touch').hidden=false;$('dialog').hidden=true;updateHud()}
+function ranking(){return 1+rivals.filter(r=>r.finished||r.d>dist).length}
 function format(t){return Math.floor(t/60)+':'+(t%60).toFixed(2).padStart(5,'0')}
 function renderText(id,content,html=false){const node=$(id);if(node.dataset.value===content)return;node.dataset.value=content;if(html)node.innerHTML=content;else node.textContent=content}
-function updateHud(){renderText('progress','<b>'+ranking()+'/6</b> &nbsp; Kolo '+Math.min(2,Math.floor(dist/length)+1)+'/2',true);renderText('clock',format(elapsed));renderText('speed',Math.round(speed*3.6)+' <small>km/h</small>',true)}
-function showDialog(done){$('restart').hidden=done;state=done?'finish':'pause';keys.clear();$('dialog').hidden=false;$('touch').hidden=true;$('heading').textContent=done?(ranking()===1?'Vítězství!':'Cíl závodu'):'Pauza';$('result').textContent=done?ranking()+'. místo · '+format(elapsed):tracks[track][0];$('resume').textContent=done?'Další závod':'Pokračovat'}
-function resume(){if(state==='finish')start();else if(state==='pause'){state=count>0?'count':'race';$('dialog').hidden=true;$('touch').hidden=false}}
-function menu(){state='menu';$('menu').hidden=false;$('hud').hidden=true;$('dialog').hidden=true;$('touch').hidden=true;$('message').textContent='';keys.clear();select(track)}
+let nextInfoAt=0;
+function updateHud(){
+ if(nextInfoAt===0||elapsed<nextInfoAt-.21||elapsed>=nextInfoAt){
+ nextInfoAt=elapsed+.2;circuitDisplay();const ahead=upcomingCorner(dist);
+ const target=Math.sqrt((track===2?16:22)/Math.max(.001,Math.abs(ahead.curve)));
+ const brakeDistance=Math.max(0,(speed*speed-target*target)/65);
+ const note=lapFlash>0&&lapTimes.length?'Čas kola '+format(lapTimes.at(-1)):brakeDistance>ahead.distance-18&&Math.abs(ahead.curve)>.009&&speed>target+4?(ahead.curve>0?'Brzdi · pravá zatáčka':'Brzdi · levá zatáčka'):draft>.32?'Jízda v závěsu':'';
+ renderText('engineer',note)
+ }renderText('progress','<b>'+ranking()+'/6</b> &nbsp; Kolo '+Math.min(2,Math.floor(dist/length)+1)+'/2',true);renderText('clock','<small>ČAS KOLA</small>'+format(Math.max(0,elapsed-lapStart)),true);renderText('speed','<i>G'+gear+'</i>'+Math.round(speed*3.6)+'<small>KM/H</small>',true)}
+function showDialog(done){$('restart').hidden=done;state=done?'finish':'pause';mixAudio();keys.clear();$('dialog').hidden=false;$('touch').hidden=true;$('heading').textContent=done?(ranking()===1?'Vítězství!':'Cíl závodu'):'Pauza';$('result').textContent=done?ranking()+'. místo · '+format(elapsed)+' · Nejlepší kolo '+format(Math.min(...lapTimes))+' · Rekord okruhu '+format(bestLap):tracks[track][0];$('resume').textContent=done?'Další závod':'Pokračovat'}
+function resume(){if(!muted)primeAudio();if(state==='finish')start();else if(state==='pause'){state=count>0?'count':'race';$('dialog').hidden=true;$('touch').hidden=false}}
+function menu(){state='menu';mixAudio();$('menu').hidden=false;$('hud').hidden=true;$('dialog').hidden=true;$('touch').hidden=true;$('message').textContent='';keys.clear();select(track)}
 $('restart').onclick=()=>{if(state==='pause')start()};$('start').onclick=start;$('resume').onclick=resume;$('back').onclick=menu;$('pause').onclick=()=>{if(state==='count'||state==='race')showDialog(false)};
 function tick(dt){
  if(state==='menu')return;
- if(state==='count'){count-=dt;$('message').textContent=count<=0?'START':Math.ceil(count);if(count<=0)state='race';return}
+ if(state==='count'){count-=dt;const lamps=limit(Math.floor((3-count)/.52)+1,1,5);
+ if(count<=0){$('message').textContent='START';state='race'}else if($('message').dataset.lamps!==String(lamps)||!$('message').firstChild){$('message').dataset.lamps=String(lamps);$('message').innerHTML='<span class="lights" aria-label="Startovní světla">'+Array.from({length:5},(_,i)=>'<i class="'+(i<lamps?'lit':'')+'"></i>').join('')+'</span>'}return}
  if(state!=='race')return;
- elapsed+=dt;if(elapsed>.8)$('message').textContent='';
+ elapsed+=dt;lapFlash=Math.max(0,lapFlash-dt);if(elapsed>.8&&$('message').textContent)$('message').textContent='';
  let gas=keys.has('ArrowUp'),brake=keys.has('ArrowDown'),input=Number(keys.has('ArrowRight'))-Number(keys.has('ArrowLeft')),curve=turn(dist+9),off=Math.abs(lane)>1;
- speed=limit(speed+dt*((gas?21*(1-speed/106): -3)-speed*.012-(brake?38:0)-(off?16:0)),0,91);
+ speed=limit(speed+dt*((gas?(21+draft*4)*(1-speed/(106+draft*7)): -3)-speed*.012-(brake?38:0)-(off?16:0)),0,91+draft*3);transmission(dt,gas);
  const approach=(value,target,rate)=>mix(value,target,1-Math.exp(-rate*dt));
  steer=approach(steer,input,input===0?8:6);
- const outward=limit(curve*speed*speed*.013,-2.4,2.4);
- const grip=off?3.5:6.5;
+ const outward=limit(curve*speed*speed*(track===2?.016:.013),-2.4,2.4);
+ const grip=off?3.3:track===2?4.5:6.5;
  lateralSpeed=approach(lateralSpeed,steer*Math.min(speed*.11,2.1)-outward,grip);
  lane=limit(lane+lateralSpeed*dt,-1.32,1.32);
  if(Math.abs(lane)>=1.32&&Math.sign(lane)===Math.sign(lateralSpeed))lateralSpeed=0;
  cameraLane=approach(cameraLane,lane,8);
  bodyYaw=approach(bodyYaw,limit(steer*.16+curve*speed*.065,-.28,.28)*Math.min(1,speed/9),7);
- dist+=speed*dt;guard-=dt;
- for(let r of rivals){let upcoming=Math.max(Math.abs(turn(r.d+24)),Math.abs(turn(r.d+56)));let target=r.pace/(1+upcoming*22);r.v+=limit(target-r.v,-30*dt,12*dt);r.d+=r.v*dt;if(guard<=0&&Math.abs(r.d-dist)<4&&Math.abs(r.l-lane)<.27){speed*=.73;lateralSpeed+=(lane>=r.l?1:-1)*.95;guard=1}}
+ const previous=dist;dist+=speed*dt;guard-=dt;
+ if(Math.floor(dist/length)>Math.floor(previous/length))crossLine(elapsed-(dist%length)/Math.max(1,speed));
+ raceOpponents(dt);
  if(dist>=length*2){updateHud();showDialog(true)}
 }
 const mapping={KeyW:'ArrowUp',KeyS:'ArrowDown',KeyA:'ArrowLeft',KeyD:'ArrowRight'};
@@ -225,7 +375,7 @@ onblur=()=>{keys.clear();if(state==='race'||state==='count')showDialog(false)};
 function frame(now){
  let remaining=last?Math.min((now-last)/1000,.12):0;last=now;
  while(remaining>0){const dt=Math.min(remaining,1/120);tick(dt);remaining-=dt}
- if(state==='count'||state==='race')updateHud();
+ if(state==='count'||state==='race'){updateHud();mixAudio()}
  if(state!=='menu')draw();requestAnimationFrame(frame)
 }
 select(0);requestAnimationFrame(frame);
