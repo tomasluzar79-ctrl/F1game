@@ -705,4 +705,359 @@ update = function(dt) {
   }
 };
 
+/* =========================================
+   SEDA FRONTA - JESKYNE A TUNELY
+   Pridat na konec stavajiciho skriptu
+========================================= */
+
+const caveOldMission = mission;
+const caveOldUpdate = update;
+const caveOldDraw = draw;
+
+let caveAreas = [];
+let caveInside = null;
+let caveHintTime = 0;
+
+// Vytvoreni podzemnich oblasti
+mission = function(n) {
+  caveOldMission(n);
+  caveAreas = [];
+  caveInside = null;
+
+  // Tunely v kazde misi
+  for (let x = 950; x < end - 520; x += 1150) {
+    // Tunel musi byt pod souvislou zemi
+    const ground = solids.find(s =>
+      s.ground &&
+      x >= s.x + 40 &&
+      x + 410 <= s.x + s.w - 40
+    );
+
+    if (!ground) continue;
+
+    caveAreas.push({
+      x: x,
+      w: 410,
+      y: floor + 42,
+      h: 100,
+      shaft: x + 205,
+      name: n === 1 ? "PODZEMNI BUNKR" :
+            n === 2 ? "SKALNI JESKYNE" :
+                      "TAJNY TUNEL"
+    });
+  }
+
+  message("Pro vstup do jeskyni stiskni T", 4);
+};
+
+// Nejblizsi vstup
+function caveNearestEntrance() {
+  let found = null;
+  let distance = 42;
+
+  for (const c of caveAreas) {
+    for (const x of [c.x, c.shaft, c.x + c.w]) {
+      const d = Math.abs(p.x - x);
+      if (d < distance) {
+        distance = d;
+        found = {c, x};
+      }
+    }
+  }
+
+  return found;
+}
+
+// Vstup a vystup
+function caveToggle() {
+  if (mode !== "run") return;
+
+  if (caveInside) {
+    const c = caveInside;
+    const exits = [c.x, c.shaft, c.x + c.w];
+
+    let exit = exits[0];
+    for (const x of exits) {
+      if (Math.abs(x - p.x) < Math.abs(exit - p.x)) {
+        exit = x;
+      }
+    }
+
+    if (Math.abs(exit - p.x) > 43) {
+      message("Dojdi ke vstupu nebo k zeb riku", 2);
+      return;
+    }
+
+    p.x = exit;
+    p.y = floor;
+    p.vx = 0;
+    p.vy = 0;
+    p.ground = true;
+    p.grace = 0.1;
+    p.safe = Math.max(p.safe, 0.8);
+    caveInside = null;
+    message("Vystoupil jsi z podzemi", 2);
+    return;
+  }
+
+  if (ride) {
+    message("Nejdrive vystup z vozidla", 2);
+    return;
+  }
+
+  if (!p.ground) return;
+
+  const entrance = caveNearestEntrance();
+  if (!entrance) {
+    message("Pribliz se ke vchodu do jeskyne", 2);
+    return;
+  }
+
+  caveInside = entrance.c;
+  p.x = entrance.x;
+  p.y = caveInside.y + caveInside.h - 10;
+  p.vx = 0;
+  p.vy = 0;
+  p.ground = true;
+  p.safe = Math.max(p.safe, 1);
+
+  message(caveInside.name + " - T: vystup", 3);
+}
+
+// Klavesa T
+addEventListener("keydown", e => {
+  if (e.code === "KeyT" && !e.repeat) {
+    e.preventDefault();
+    caveToggle();
+  }
+});
+
+// Mobilni tlacitko
+const caveTouchButton = document.createElement("button");
+caveTouchButton.textContent = "Tunel";
+caveTouchButton.style.background = "#51483b";
+caveTouchButton.style.touchAction = "manipulation";
+
+const caveTouchArea =
+  document.querySelector("#touch > div:last-child");
+
+if (caveTouchArea) {
+  caveTouchArea.appendChild(caveTouchButton);
+}
+
+caveTouchButton.addEventListener("pointerdown", e => {
+  e.preventDefault();
+  caveToggle();
+});
+
+// Aktualizace pohybu pod zemi
+update = function(dt) {
+  if (!caveInside || mode !== "run") {
+    caveOldUpdate(dt);
+    return;
+  }
+
+  const c = caveInside;
+  const direction =
+    Number(keys.has("right")) -
+    Number(keys.has("left"));
+
+  p.vx = direction * 125;
+  p.x = clamp(
+    p.x + p.vx * dt,
+    c.x + 8,
+    c.x + c.w - 8
+  );
+
+  if (direction) p.dir = direction;
+
+  p.walk += Math.abs(p.vx) * dt / 28;
+  p.y = c.y + c.h - 10;
+  p.vy = 0;
+  p.ground = true;
+  p.safe = Math.max(p.safe, 0.2);
+
+  sessionTime += dt;
+  p.cd = Math.max(0, p.cd - dt);
+  caveHintTime += dt;
+
+  // Kamera sleduje hrace
+  const target = clamp(
+    p.x - width / zoom * 0.35,
+    0,
+    Math.max(0, end - width / zoom + 120)
+  );
+
+  cam += (target - cam) *
+    (1 - Math.exp(-dt * 7));
+
+  if (caveHintTime > 7) {
+    caveHintTime = 0;
+    message("T: vystup | A/D: pohyb", 2);
+  }
+};
+
+// Pixel-art bloky kamene
+function caveStone(x, y, w, h, seed) {
+  rect(x, y, w, h, "#4b514a");
+
+  for (let j = 0; j < h; j += 16) {
+    for (let i = 0; i < w; i += 22) {
+      const noise = Math.abs(
+        Math.sin((i + x) * 0.17 +
+                 (j + y) * 0.31 + seed)
+      );
+
+      rect(
+        x + i + 2,
+        y + j + 2,
+        15,
+        10,
+        noise > 0.6 ? "#697269" : "#596258"
+      );
+
+      rect(
+        x + i + 3,
+        y + j + 3,
+        8,
+        2,
+        "#7d8575"
+      );
+    }
+  }
+}
+
+// Vykresleni jeskyne
+function caveDrawArea(c) {
+  const x = c.x;
+  const y = c.y;
+  const w = c.w;
+  const h = c.h;
+
+  // Podzemni chodba
+  rect(x, y, w, h, "#202722");
+
+  // Skalni strop
+  caveStone(x, y - 22, w, 22, x);
+
+  // Skalni podlaha
+  caveStone(x, y + h - 10, w, 25, x + 12);
+
+  // Zadni skalni stena
+  for (let i = 18; i < w - 15; i += 42) {
+    rect(x + i, y + 12, 3, 40, "#343d37");
+    rect(x + i + 4, y + 22, 15, 2, "#4e594e");
+  }
+
+  // Drevene podpery
+  for (let i = 35; i < w; i += 100) {
+    rect(x + i, y + 5, 8, h - 15, "#765c3e");
+    rect(x + i - 10, y + 5, 28, 7, "#9a7950");
+    rect(x + i + 2, y + 13, 2, h - 25, "#b08a5a");
+  }
+
+  // Svetla
+  for (let i = 65; i < w; i += 130) {
+    ellipse(x + i, y + 16, 19, 13, "#5c5331");
+    rect(x + i - 5, y + 7, 10, 5, "#e6b85d");
+    rect(x + i - 2, y + 12, 4, 3, "#fff0a5");
+  }
+
+  // Kameny na podlaze
+  for (let i = 20; i < w; i += 57) {
+    rect(x + i, y + h - 17, 14, 7, "#73786b");
+    rect(x + i + 4, y + h - 20, 7, 3, "#8b9080");
+  }
+
+  // Zebrik do jeskyne
+  rect(c.shaft - 12, y - 5, 3, h - 5, "#a58b60");
+  rect(c.shaft + 9, y - 5, 3, h - 5, "#a58b60");
+
+  for (let j = 5; j < h - 8; j += 13) {
+    rect(c.shaft - 10, y + j, 20, 3, "#c0a171");
+  }
+
+  // Nazev jeskyne
+  g.font = "bold 12px monospace";
+  g.fillStyle = "#e9d49b";
+  g.fillText(c.name, x + 15, y + 42);
+}
+
+// Vstupni portaly na povrchu
+function caveDrawEntrances(c) {
+  const xs = [c.x, c.x + c.w];
+
+  for (const x of xs) {
+    // Skala okolo vchodu
+    rect(x - 24, floor - 72, 48, 72, "#505b50");
+    rect(x - 19, floor - 66, 38, 66, "#6b7769");
+
+    // Tmavy otvor
+    rect(x - 13, floor - 53, 26, 53, "#171e1a");
+    rect(x - 10, floor - 57, 20, 7, "#2c342d");
+
+    // Kamenny oblouk
+    rect(x - 20, floor - 61, 7, 61, "#879080");
+    rect(x + 13, floor - 61, 7, 61, "#879080");
+    rect(x - 20, floor - 68, 40, 9, "#9a9d87");
+
+    // Znacka
+    rect(x - 13, floor - 91, 26, 15, "#c0a16b");
+    g.font = "bold 11px monospace";
+    g.fillStyle = "#262b22";
+    g.fillText("T", x - 4, floor - 79);
+  }
+
+  // Vstup shora
+  rect(c.shaft - 18, floor - 5, 36, 5, "#c9b27b");
+  rect(c.shaft - 15, floor - 13, 4, 13, "#a38c64");
+  rect(c.shaft + 11, floor - 13, 4, 13, "#a38c64");
+
+  g.font = "bold 11px monospace";
+  g.fillStyle = "#f5d27e";
+  g.fillText("T", c.shaft - 4, floor - 22);
+}
+
+// Vykreslovani
+draw = function() {
+  caveOldDraw();
+
+  if (mode === "menu" || !caveAreas.length) return;
+
+  g.save();
+
+  g.translate(
+    0,
+    height * 0.82 - floor * zoom
+  );
+  g.scale(zoom, zoom);
+  g.translate(-cam, 0);
+
+  const visibleRight = cam + width / zoom;
+
+  for (const c of caveAreas) {
+    if (c.x > visibleRight + 100 ||
+        c.x + c.w < cam - 100) continue;
+
+    caveDrawArea(c);
+    caveDrawEntrances(c);
+  }
+
+  // Postava uvnitr tunelu
+  if (caveInside) {
+    soldier(p, true);
+
+    // Ukazatel polohy postavy
+    g.font = "bold 12px monospace";
+    g.fillStyle = "#f4cf77";
+    g.fillText(
+      "T = VYSTUP",
+      p.x - 35,
+      p.y - 78
+    );
+  }
+
+  g.restore();
+};
+
 </script></html>
