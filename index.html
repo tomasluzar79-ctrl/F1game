@@ -559,4 +559,150 @@ draw = function() {
   g.restore();
 };
 
+/* ==========================================
+   SEDA FRONTA - PEVNE KOLIZE
+   Vojaci, auta, motorky a tanky
+   Vlozit na konec stavajiciho scriptu
+========================================== */
+
+const collisionOriginalUpdate = update;
+
+// Sirka jednotlivych objektu
+function collisionHalfWidth(obj) {
+  if (obj.kind === "tank" || obj.tank) return 43;
+  if (obj.kind === "jeep") return 38;
+  if (obj.kind === "bike") return 23;
+  return 12;
+}
+
+// Kontrola, zda jsou objekty ve stejne vysce
+function collisionSameHeight(a, b) {
+  const aTop = a.y - (a.kind ? 48 : a.tank ? 50 : 53);
+  const bTop = b.y - (b.kind ? 48 : b.tank ? 50 : 53);
+
+  return a.y > bTop + 5 && b.y > aTop + 5;
+}
+
+// Seznam prekazek
+function collisionObstacles() {
+  const obstacles = [];
+
+  // Zivi nepratelsti vojaci a tanky
+  for (const enemy of foes) {
+    if (enemy.hp > 0) {
+      obstacles.push(enemy);
+    }
+  }
+
+  // Zaparkovana vozidla
+  for (const car of cars) {
+    if (car !== ride) {
+      obstacles.push({
+        x: car.x,
+        y: floor,
+        kind: car.kind
+      });
+    }
+  }
+
+  return obstacles;
+}
+
+// Zastaveni pri pokusu projet prekazkou
+function collisionStop(oldX, newX) {
+  const playerObject = {
+    x: newX,
+    y: p.y,
+    kind: ride ? ride.kind : null
+  };
+
+  const playerRadius = ride
+    ? collisionHalfWidth(ride)
+    : 11;
+
+  let result = newX;
+
+  for (const obstacle of collisionObstacles()) {
+    if (!collisionSameHeight(playerObject, obstacle)) {
+      continue;
+    }
+
+    const radius =
+      playerRadius + collisionHalfWidth(obstacle);
+
+    const left = obstacle.x - radius;
+    const right = obstacle.x + radius;
+
+    // Zleva do prekazky
+    if (oldX <= left && newX > left) {
+      result = Math.min(result, left);
+    }
+
+    // Zprava do prekazky
+    if (oldX >= right && newX < right) {
+      result = Math.max(result, right);
+    }
+  }
+
+  return result;
+}
+
+// Rozsireni aktualizace hry
+update = function(dt) {
+  if (mode !== "run") {
+    collisionOriginalUpdate(dt);
+    return;
+  }
+
+  const oldX = p.x;
+
+  // Zapamatujeme si pozice nepratel
+  const enemyPositions = foes.map(e => e.x);
+
+  collisionOriginalUpdate(dt);
+
+  if (mode !== "run") return;
+
+  // Hrac ani vozidlo neprojdou skrz prekazku
+  const correctedX = collisionStop(oldX, p.x);
+
+  if (correctedX !== p.x) {
+    p.x = correctedX;
+    p.vx = 0;
+
+    if (ride) {
+      ride.x = p.x;
+    }
+  }
+
+  // Nepratele nesmeji projit skrz hrace
+  for (let i = 0; i < foes.length; i++) {
+    const enemy = foes[i];
+
+    if (enemy.hp <= 0) continue;
+
+    if (!collisionSameHeight(
+      {x:p.x,y:p.y,kind:ride?.kind},
+      enemy
+    )) continue;
+
+    const radius =
+      (ride ? collisionHalfWidth(ride) : 11)
+      + collisionHalfWidth(enemy);
+
+    const previousDistance =
+      Math.abs(enemyPositions[i] - p.x);
+
+    const currentDistance =
+      Math.abs(enemy.x - p.x);
+
+    if (
+      previousDistance >= radius &&
+      currentDistance < radius
+    ) {
+      enemy.x = enemyPositions[i];
+    }
+  }
+};
+
 </script></html>
