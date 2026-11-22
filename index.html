@@ -134,4 +134,429 @@ function draw(){background();if(mode==='menu')return;g.save();g.translate(0,heig
  for(let q of fx){g.globalAlpha=Math.min(1,q.life*3);ellipse(q.x,q.y,q.r,q.r,q.c)}g.globalAlpha=1;
  rect(end-3,floor-84,4,84,'#788070');rect(end,floor-82,30,18,'#daa94f');g.fillStyle='#ffe8b3';g.font='bold 13px monospace';g.fillText('CÍL',end+4,floor-69);g.restore()}
 function frame(t){let dt=Math.min(.06,(t-last)/1000||0);last=t;clock+=dt;while(dt>.000001){let s=Math.min(1/100,dt);update(s);dt-=s}draw();requestAnimationFrame(frame)}select(0);requestAnimationFrame(frame);
+
+/* ===== ROZSIRENI SEDA FRONTA =====
+   3 zivoty, checkpointy, vrtulniky,
+   vyssi obtiznost, lezici postava
+================================= */
+
+let extraLives = 3;
+let extraCheckpoints = [];
+let extraRespawn = 70;
+let extraHelis = [];
+let extraBombs = [];
+let extraGameOver = false;
+
+const baseMission = mission;
+const baseUpdate = update;
+const baseDraw = draw;
+const basePanel = panel;
+const baseHud = hud;
+const baseSoldier = soldier;
+const basePress = press;
+
+// Mobilni tlacitko
+const proneButton = document.createElement("button");
+proneButton.textContent = "Lehnout";
+proneButton.dataset.k = "prone";
+proneButton.style.background = "#455348";
+proneButton.style.touchAction = "none";
+document.querySelector("#touch > div:last-child")
+  .appendChild(proneButton);
+
+proneButton.onpointerdown = e => {
+  e.preventDefault();
+  proneButton.setPointerCapture(e.pointerId);
+  press("prone");
+};
+proneButton.onpointerup = () => keys.delete("prone");
+proneButton.onpointercancel = () => keys.delete("prone");
+proneButton.onlostpointercapture =
+  () => keys.delete("prone");
+
+// Klavesa X - drzet pro lezeni
+addEventListener("keydown", e => {
+  if (e.code === "KeyX" && mode === "run") {
+    e.preventDefault();
+    press("prone");
+  }
+});
+
+addEventListener("keyup", e => {
+  if (e.code === "KeyX") keys.delete("prone");
+});
+
+// Uprava stisku tlacitek
+press = function(k) {
+  if (k === "prone") {
+    if (mode === "run") keys.add("prone");
+    return;
+  }
+  basePress(k);
+};
+
+// Zobrazeni zivotu
+function extraHud() {
+  let el = $("extraLives");
+
+  if (!el) {
+    el = document.createElement("span");
+    el.id = "extraLives";
+    el.className = "plate";
+    $("hud").insertBefore(el, $("ammo"));
+  }
+
+  el.textContent = "Zivoty: " + extraLives;
+}
+
+hud = function() {
+  baseHud();
+  extraHud();
+};
+
+// Vytvoreni mise
+mission = function(n) {
+  baseMission(n);
+
+  extraLives = 3;
+  extraRespawn = 70;
+  extraGameOver = false;
+  extraBombs = [];
+
+  extraCheckpoints = [];
+
+  // Checkpointy pouze na pevne zemi
+  for (let x = 800; x < end - 200; x += 850) {
+    const ground = solids.find(s =>
+      s.ground && x >= s.x + 30 &&
+      x <= s.x + s.w - 30
+    );
+
+    if (ground) {
+      extraCheckpoints.push({
+        x: x,
+        active: false
+      });
+    }
+  }
+
+  // Vrtulniky
+  extraHelis = [];
+
+  for (let x = 600; x < end - 100; x += 650) {
+    extraHelis.push({
+      x: x,
+      home: x,
+      y: floor - 190,
+      hp: 80,
+      maxHp: 80,
+      phase: Math.random() * 6,
+      cd: 2,
+      attack: extraHelis.length % 2 === 0
+    });
+  }
+
+  // Zvyseni obtiznosti
+  foes.forEach((e, i) => {
+    e.hp = Math.round(e.hp * (1.2 + n * 0.12));
+    e.max = e.hp;
+    e.cd *= 0.85;
+  });
+
+  extraHud();
+};
+
+// Ztrata zivota
+function extraDie() {
+  if (extraGameOver) return;
+
+  extraLives--;
+  extraHud();
+
+  if (extraLives <= 0) {
+    extraGameOver = true;
+    basePanel("lost");
+    $("title").textContent = "GAME OVER";
+    $("summary").textContent =
+      "Dosly ti vsechny tri zivoty.";
+    $("action").textContent = "Hrat znovu";
+    return;
+  }
+
+  ride = null;
+  p.x = extraRespawn;
+  p.y = floor;
+  p.vx = 0;
+  p.vy = 0;
+  p.hp = 100;
+  p.safe = 2.5;
+  p.ground = true;
+  p.grace = 0.1;
+  p.duck = false;
+  p.prone = false;
+
+  keys.delete("prone");
+  shots = [];
+  extraBombs = [];
+
+  // Vraceni kamery k checkpointu
+  cam = clamp(
+    p.x - width / zoom * 0.35,
+    0,
+    Math.max(0, end - width / zoom + 120)
+  );
+
+  message("Ztrata zivota! Zbyva: " + extraLives, 2);
+  hud();
+}
+
+// Zachyceni konce hry
+panel = function(state) {
+  if (state === "lost" && !extraGameOver) {
+    extraDie();
+    return;
+  }
+
+  basePanel(state);
+};
+
+// Vlastni kresba leziciho vojaka
+soldier = function(a, hero) {
+  if (!hero || !p.prone || ride) {
+    baseSoldier(a, hero);
+    return;
+  }
+
+  g.save();
+  g.translate(a.x, a.y);
+  g.scale(a.dir, 1);
+
+  if (p.safe > 0) {
+    g.globalAlpha =
+      0.55 + 0.4 * Math.abs(Math.sin(clock * 20));
+  }
+
+  // Nohy
+  rect(-31, -11, 29, 8, "#454e3b");
+  rect(-37, -7, 14, 6, "#282d29");
+
+  // Telo
+  rect(-8, -17, 29, 12, "#737c59");
+  rect(0, -17, 14, 4, "#a4a283");
+
+  // Hlava a helma
+  ellipse(25, -11, 8, 6, "#ad9177");
+  ellipse(24, -15, 9, 5, "#46503c");
+
+  // Ruce a zbran
+  rect(9, -9, 21, 5, "#5b644c");
+  rect(27, -11, 25, 3, "#303631");
+
+  g.restore();
+};
+
+// Herni aktualizace
+update = function(dt) {
+  if (mode !== "run") return;
+
+  // Lehnuti pouze na zemi, mimo vozidlo
+  const lying = keys.has("prone") &&
+    !ride && p.ground;
+
+  p.prone = lying;
+
+  // Pri lezeni se postava nepohybuje
+  const left = keys.has("left");
+  const right = keys.has("right");
+  const jump = keys.has("jump");
+
+  if (lying) {
+    keys.delete("left");
+    keys.delete("right");
+    keys.delete("jump");
+    jumpBuffer = 0;
+    p.vx = 0;
+
+    // Strely nad lezici postavou ji minou
+    for (const s of shots) {
+      if (!s.enemy || s.life <= 0) continue;
+
+      const nextX = s.x + s.vx * dt;
+
+      if (
+        Math.min(s.x, nextX) < p.x + 15 &&
+        Math.max(s.x, nextX) > p.x - 15 &&
+        s.y < p.y - 18
+      ) {
+        s.life = 0;
+      }
+    }
+  }
+
+  baseUpdate(dt);
+
+  // Obnoveni drzenych smerovych klaves
+  if (left) keys.add("left");
+  if (right) keys.add("right");
+  if (jump) keys.add("jump");
+
+  if (mode !== "run") return;
+
+  p.prone = lying && p.ground && !ride;
+
+  // Checkpointy
+  for (const cp of extraCheckpoints) {
+    if (!cp.active && p.x >= cp.x) {
+      cp.active = true;
+      extraRespawn = cp.x;
+      message("CHECKPOINT AKTIVOVAN", 2);
+    }
+  }
+
+  // Pohyb a utoky vrtulniku
+  for (const h of extraHelis) {
+    if (h.hp <= 0) continue;
+
+    h.phase += dt;
+
+    h.x = h.home + Math.sin(h.phase * 0.6) * 75;
+    h.y = floor - 190 + Math.sin(h.phase * 2) * 13;
+
+    h.cd -= dt;
+
+    if (
+      h.attack &&
+      Math.abs(h.x - p.x) < 380 &&
+      h.cd <= 0
+    ) {
+      extraBombs.push({
+        x: h.x,
+        y: h.y + 15,
+        vx: (p.x - h.x) * 0.35,
+        vy: 140,
+        life: 4
+      });
+
+      h.cd = 1.7 + Math.random();
+    }
+
+    // Zasahy vrtulniku
+    for (const s of shots) {
+      if (s.enemy || s.life <= 0) continue;
+
+      if (
+        Math.abs(s.x - h.x) < 43 &&
+        Math.abs(s.y - h.y) < 24
+      ) {
+        h.hp -= s.w >= 4 ? 80 : 25;
+        s.life = 0;
+        puff(s.x, s.y, "#ffb347", 9, 1.2);
+
+        if (h.hp <= 0) {
+          puff(h.x, h.y, "#ff9030", 35, 2);
+          shake = 6;
+          kills++;
+        }
+      }
+    }
+  }
+
+  // Projektily vrtulniku
+  for (const b of extraBombs) {
+    b.x += b.vx * dt;
+    b.y += b.vy * dt;
+    b.vy += 90 * dt;
+    b.life -= dt;
+
+    if (
+      Math.abs(b.x - p.x) < 16 &&
+      Math.abs(b.y - (p.y - (p.prone ? 8 : 30)))
+        < (p.prone ? 10 : 26)
+    ) {
+      hurt(22);
+      b.life = 0;
+    }
+
+    if (b.y >= floor) {
+      b.life = 0;
+      puff(b.x, floor, "#e5a24a", 10, 1);
+    }
+  }
+
+  extraBombs = extraBombs.filter(b => b.life > 0);
+};
+
+// Vykresleni
+draw = function() {
+  baseDraw();
+
+  if (mode === "menu") return;
+
+  g.save();
+  g.translate(0, height * 0.82 - floor * zoom);
+  g.scale(zoom, zoom);
+  g.translate(-cam, 0);
+
+  // Vlajky
+  for (const cp of extraCheckpoints) {
+    rect(cp.x, floor - 88, 4, 88, "#c1c3b5");
+    rect(
+      cp.x + 4, floor - 88, 32, 20,
+      cp.active ? "#42d76d" : "#e5b84e"
+    );
+
+    g.font = "bold 11px monospace";
+    g.fillStyle = "#202820";
+    g.fillText("CP", cp.x + 9, floor - 74);
+  }
+
+  // Vrtulniky
+  for (const h of extraHelis) {
+    if (h.hp <= 0) continue;
+
+    g.save();
+    g.translate(h.x, h.y);
+
+    // Ocas
+    rect(-65, -7, 47, 7, "#56685c");
+    rect(-65, -18, 5, 24, "#819183");
+
+    // Trup
+    ellipse(0, 0, 39, 17, "#536b60");
+    ellipse(15, -3, 17, 11, "#91a9a7");
+
+    // Podvozek
+    rect(-24, 18, 49, 3, "#303b38");
+    rect(-19, 10, 3, 9, "#303b38");
+    rect(18, 10, 3, 9, "#303b38");
+
+    // Rotor
+    rect(-2, -23, 4, 9, "#363d39");
+    const rotor = Math.sin(clock * 42) * 9;
+    rect(-52 + rotor, -25, 104 - rotor * 2, 3,
+      "#cbd4c9");
+
+    if (h.attack) {
+      rect(-12, 13, 24, 6, "#333c34");
+      rect(0, 19, 5, 10, "#292f2b");
+    }
+
+    g.restore();
+
+    // Ukazatel zdravi
+    rect(h.x - 25, h.y - 38, 50, 4, "#702c2c");
+    rect(h.x - 25, h.y - 38,
+      50 * Math.max(0, h.hp / h.maxHp),
+      4, "#8ed17a");
+  }
+
+  // Strely vrtulniku
+  for (const b of extraBombs) {
+    ellipse(b.x, b.y, 5, 7, "#ff9e36");
+    ellipse(b.x, b.y, 2, 4, "#ffe5a1");
+  }
+
+  g.restore();
+};
+
 </script></html>
