@@ -1060,4 +1060,141 @@ draw = function() {
   g.restore();
 };
 
+/* =====================================
+   SEDA FRONTA - NOVE PIXEL ART POZADI
+   Bez fotografie a bez parallax efektu
+===================================== */
+
+// Nahradi puvodni vykreslovani pozadi.
+// Ostatni casti hry zustanou zachovane.
+
+background = function() {
+  const W = width;
+  const H = height;
+
+  // Barvy podle mise
+  const palettes = [
+    {
+      sky: "#879d91",
+      horizon: "#687e73",
+      hill: "#53695b",
+      hill2: "#43574b",
+      detail: "#39483e"
+    },
+    {
+      sky: "#9eb3a0",
+      horizon: "#708c72",
+      hill: "#476c4d",
+      hill2: "#35553c",
+      detail: "#284531"
+    },
+    {
+      sky: "#879ba9",
+      horizon: "#6b7d8b",
+      hill: "#596a73",
+      hill2: "#414f5b",
+      detail: "#303d47"
+    }
+  ];
+
+  const c = palettes[level];
+
+  g.save();
+  g.imageSmoothingEnabled = false;
+
+  // Obloha
+  g.fillStyle = c.sky;
+  g.fillRect(0, 0, W, H);
+
+  // Pixelove mraky - staticke
+  function cloud(x, y, scale) {
+    g.fillStyle = "#d7ded0";
+    g.fillRect(x, y, 48 * scale, 9 * scale);
+    g.fillRect(
+      x + 9 * scale,
+      y - 9 * scale,
+      29 * scale,
+      9 * scale
+    );
+    g.fillRect(
+      x + 17 * scale,
+      y - 15 * scale,
+      14 * scale,
+      6 * scale
+    );
+  }
+
+  cloud(W * 0.14, H * 0.17, 1.2);
+  cloud(W * 0.62, H * 0.25, 1.5);
+  cloud(W * 0.86, H * 0.12, 0.8);
+
+  // Vzdalene hory - bez posouvani
+  const baseY = H * 0.82;
+
+  g.fillStyle = c.horizon;
+
+  for (let x = -100; x < W + 200; x += 180) {
+    g.beginPath();
+    g.moveTo(x, baseY);
+    g.lineTo(x + 90, baseY - 130);
+    g.lineTo(x + 180, baseY);
+    g.closePath();
+    g.fill();
+  }
+
+  // Pixelove kopce
+  g.fillStyle = c.hill;
+
+  for (let x = -80; x < W + 180; x += 150) {
+    const top = baseY - 65 - (x % 3) * 9;
+
+    g.fillRect(x, top + 36, 150, baseY - top);
+    g.fillRect(x + 25, top + 18, 100, 30);
+    g.fillRect(x + 50, top, 50, 24);
+  }
+
+  // Nejblizsi siluety
+  g.fillStyle = c.hill2;
+
+  for (let x = -50; x < W + 150; x += 110) {
+    const top = baseY - 30 - (x % 4) * 7;
+
+    g.fillRect(x, top + 22, 110, baseY - top);
+    g.fillRect(x + 18, top + 10, 75, 24);
+    g.fillRect(x + 38, top, 35, 15);
+  }
+
+  // Detaily podle prostredi
+  g.fillStyle = c.detail;
+
+  if (level === 1) {
+    // Dzungle - pixelove stromy
+    for (let x = 30; x < W; x += 115) {
+      g.fillRect(x + 18, baseY - 92, 12, 92);
+      g.fillRect(x, baseY - 124, 48, 35);
+      g.fillRect(x + 8, baseY - 145, 32, 25);
+      g.fillRect(x + 17, baseY - 157, 14, 15);
+    }
+  } else if (level === 2) {
+    // Hory - skalni veze
+    for (let x = 35; x < W; x += 165) {
+      g.fillRect(x, baseY - 65, 58, 65);
+      g.fillRect(x + 12, baseY - 95, 34, 35);
+      g.fillRect(x + 21, baseY - 112, 17, 20);
+    }
+  } else {
+    // Vojenska krajina - bunkry
+    for (let x = 40; x < W; x += 220) {
+      g.fillRect(x, baseY - 39, 100, 39);
+      g.fillRect(x + 12, baseY - 50, 76, 12);
+      g.fillStyle = "#a6ae98";
+      g.fillRect(x + 24, baseY - 25, 16, 7);
+      g.fillRect(x + 61, baseY - 25, 16, 7);
+      g.fillStyle = c.detail;
+    }
+  }
+
+  g.restore();
+};
+
 </script></html>
