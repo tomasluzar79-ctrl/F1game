@@ -1,6 +1,6 @@
 <!doctype html><html lang="cs"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#171e1c"><title>Šedá fronta · Plošinovka</title><style>
 *{box-sizing:border-box}body{margin:0;background:#141b19;color:#f4f0de;font:16px 'Segoe UI',Arial,sans-serif}canvas{position:fixed;width:100%;height:100%;inset:0}button{color:inherit;background:#222c27;border:1px solid #879081;border-radius:3px;font:inherit;font-weight:700;cursor:pointer}button:focus-visible{outline:3px solid #ffd379}button:hover{border-color:#ffd379}.primary{background:#f4bf59;color:#211c10;padding:13px 26px;border:0}main{position:relative;min-height:100svh;padding:clamp(18px,5vw,80px);display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:12px;background:linear-gradient(90deg,#101914f5,#111b1599 47%,transparent 85%),linear-gradient(0deg,#0b1412dc,transparent 50%)}h1{font:950 clamp(64px,11vw,165px)/.79 'Arial Black',Arial,sans-serif;letter-spacing:-.08em;margin:0;text-transform:uppercase}h1 span{color:#efbc5c}small,.eyebrow{font:700 12px/1.4 Consolas,monospace;letter-spacing:.13em;text-transform:uppercase}.eyebrow{color:#e4c588}#missions{display:flex;gap:6px;flex-wrap:wrap}#missions button{padding:9px 14px;background:#1a2420df}#missions [aria-pressed=true]{border-color:#f5c771;color:#f5c771}.hint{color:#d0d3c9;font-size:14px;max-width:540px}#brief{font-weight:650;margin:12px 0 0}#hud{position:fixed;inset:12px 14px auto;display:flex;gap:8px;align-items:center;pointer-events:none}.plate,#pause{background:#14201ce6;border:1px solid #768078;padding:8px 12px;border-radius:3px}#pause{margin-left:auto;pointer-events:auto}#toast{position:fixed;top:17%;left:50%;transform:translateX(-50%);background:#15201de8;padding:6px 12px;text-align:center;color:#ffd990}#toast:empty{display:none}#panel{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);padding:24px;background:#15201df7;border:1px solid #8c9688;width:min(92%,410px);box-shadow:0 20px 60px #0007}#panel h2{margin:0}#panel button{padding:10px 15px;margin:4px 4px 0 0}#touch{position:fixed;bottom:max(10px,env(safe-area-inset-bottom));left:8px;right:8px;display:none;justify-content:space-between}#touch button{touch-action:none;user-select:none;min-width:43px;height:49px;background:#182521db}#touch div{display:flex;gap:4px}.play{overflow:hidden;overscroll-behavior:none;touch-action:none}[hidden]{display:none!important}@media(pointer:coarse){#touch{display:flex}}@media(max-width:650px){#hud{gap:3px;inset:5px 4px auto;font-size:12px}.plate,#pause{padding:5px}.hint{font-size:12px}#missions button{padding:7px}main{padding:18px}}@media(max-height:470px){main{gap:5px;padding:12px 5vw}h1{font-size:55px}h1 br{display:none}}
-canvas{image-rendering:auto}body,button{font-family:Consolas,'Courier New',monospace}h1{font-family:'Courier New',monospace;text-shadow:4px 4px #181d15;line-height:.84}button,.plate,#pause,#panel{border-radius:0}#missions button,.primary{box-shadow:inset -3px -3px #151e1a52,inset 2px 2px #f5dfae32}.eyebrow{letter-spacing:.2em}main{background:linear-gradient(90deg,#101914ed,#111b1580 55%,transparent 85%),linear-gradient(0deg,#0b1412bb,transparent 50%)} @media(max-width:550px){#touch{left:3px;right:3px}#touch div{gap:2px}#touch button{min-width:34px;padding:0 4px;font-size:12px}}</style><canvas id="world" aria-label="Bitevní pole"></canvas><main id="menu"><div class="eyebrow">Bojová plošinovka</div><h1>Šedá<br> <span>fronta</span></h1><p id="brief"></p><div id="missions"></div><button id="start" class="primary">Vyrazit do mise</button><div class="hint">A/D pohyb · W skok · S sestup z plošiny nebo brzda v autě · Shift přikrčení · levé tlačítko myši střelba · Q zbraň · E nástup/výstup. Výzbroj sebereš přechodem přes ni.</div></main><div id="hud" hidden><b class="plate" id="stage"></b><span class="plate" id="health"></span><span class="plate" id="ammo"></span><button id="pause">Pauza</button></div><div id="toast"></div><section id="panel" hidden><h2 id="title"></h2><p id="summary"></p><button id="action" class="primary"></button><button id="back">Výběr mise</button></section><div id="touch" hidden><div><button data-k="left" aria-label="Doleva">◀</button><button data-k="right" aria-label="Doprava">▶</button></div><div><button data-k="ride">Auto</button><button data-k="duck">Dřep</button><button data-k="swap">Zbraň</button><button data-k="jump">Skok</button><button data-k="fire">Pal</button></div></div><script>
+canvas{image-rendering:auto}body,button{font-family:Consolas,'Courier New',monospace}h1{font-family:'Courier New',monospace;text-shadow:4px 4px #181d15;line-height:.84}button,.plate,#pause,#panel{border-radius:0}#missions button,.primary{box-shadow:inset -3px -3px #151e1a52,inset 2px 2px #f5dfae32}.eyebrow{letter-spacing:.2em}main{background:linear-gradient(90deg,#101914ed,#111b1580 55%,transparent 85%),linear-gradient(0deg,#0b1412bb,transparent 50%)} @media(max-width:550px){#touch{left:3px;right:3px}#touch div{gap:2px}#touch button{min-width:34px;padding:0 4px;font-size:12px}}</style><canvas id="world" aria-label="Bitevní pole"></canvas><main id="menu"><div class="eyebrow">Bojová plošinovka</div><h1>Šedá<br> <span>fronta</span></h1><p id="brief"></p><div id="missions"></div><button id="start" class="primary">Vyrazit do mise</button><div class="hint">A/D pohyb · mezerník skok · S sestup z plošiny nebo brzda v autě · Shift přikrčení · levé tlačítko myši střelba · Q zbraň · E nástup/výstup. Výzbroj sebereš přechodem přes ni.</div></main><div id="hud" hidden><b class="plate" id="stage"></b><span class="plate" id="health"></span><span class="plate" id="ammo"></span><button id="pause">Pauza</button></div><div id="toast"></div><section id="panel" hidden><h2 id="title"></h2><p id="summary"></p><button id="action" class="primary"></button><button id="back">Výběr mise</button></section><div id="touch" hidden><div><button data-k="left" aria-label="Doleva">◀</button><button data-k="right" aria-label="Doprava">▶</button></div><div><button data-k="ride">Auto</button><button data-k="duck">Dřep</button><button data-k="swap">Zbraň</button><button data-k="jump">Skok</button><button data-k="fire">Pal</button></div></div><script>
 const $=id=>document.getElementById(id),cv=$('world'),g=cv.getContext('2d'),bg=new Image();bg.src='assets/frontland.png';
 const missions=[['Zákopy','Překroč zákopy a dojdi ke spojovací stanici.','#796d48','#434c39'],['Staré město','Projdi vyklizenou čtvrtí k evakuačnímu bodu.','#827267','#524d47'],['Ocelový přístav','Proraz přes hlídané překladiště k poslednímu vysílači.','#52646a','#383e43']];
 const guns=['Pistole','Samopal','Granáty','Plamenomet','Raketomet'],keys=new Set(),clamp=(x,a,b)=>Math.max(a,Math.min(b,x)),floor=440;
@@ -35,7 +35,7 @@ cv.addEventListener('pointerdown',e=>{
 });
 function releaseTrigger(e){if(e.pointerId===firingPointer){keys.delete('fire');firingPointer=null}}
 cv.addEventListener('pointerup',releaseTrigger);cv.addEventListener('pointercancel',releaseTrigger);cv.addEventListener('lostpointercapture',releaseTrigger);
-const bind={KeyA:'left',ArrowLeft:'left',KeyD:'right',ArrowRight:'right',KeyW:'jump',ArrowUp:'jump',KeyE:'ride',KeyS:'down',ArrowDown:'down',ShiftLeft:'duck',ShiftRight:'duck',KeyQ:'swap'};
+const bind={KeyA:'left',ArrowLeft:'left',KeyD:'right',ArrowRight:'right',KeyW:'jump',ArrowUp:'jump',Space:'jump',KeyE:'ride',KeyS:'down',ArrowDown:'down',ShiftLeft:'duck',ShiftRight:'duck',KeyQ:'swap'};
 onkeydown=e=>{if(mode==='menu')return;if(e.code==='Escape'&&!e.repeat){if(mode==='run')panel('pause');else if(mode==='pause')resume()}if(bind[e.code]){e.preventDefault();press(bind[e.code])}};onkeyup=e=>keys.delete(bind[e.code]);onblur=()=>{if(mode==='run')panel('pause')};
 for(const b of document.querySelectorAll('[data-k]')){b.onpointerdown=e=>{e.preventDefault();b.setPointerCapture(e.pointerId);press(b.dataset.k)};b.onlostpointercapture=()=>keys.delete(b.dataset.k)}
 function puff(x,y,color,count,force=1){for(let i=0;i<count;i++)fx.push({x,y,vx:(Math.random()-.5)*135*force,vy:(Math.random()-.85)*115*force,life:.2+Math.random()*.38,c:color,r:1.5+Math.random()*3*force})}
@@ -56,7 +56,44 @@ function update(dt){if(mode!=='run')return;sessionTime+=dt;notice-=dt;if(notice<
  for(let q of fx){q.x+=q.vx*dt;q.y+=q.vy*dt;q.vy+=130*dt;q.life-=dt}fx=fx.filter(q=>q.life>0);cam+=(clamp(p.x-width/zoom*.35,0,Math.max(0,end-width/zoom+120))-cam)*(1-Math.exp(-dt*7));if(mode==='run'&&p.x>=end)panel('won')}
 function rect(x,y,w,h,c){g.fillStyle=c;g.fillRect(x,y,w,h)}
 function ellipse(x,y,rx,ry,c){g.fillStyle=c;g.beginPath();g.ellipse(x,y,rx,ry,0,0,7);g.fill()}
-function background(){g.fillStyle=missions[level][2];g.fillRect(0,0,width,height);if(bg.complete&&bg.naturalWidth){const strip=bg.naturalHeight/3,w=Math.max(width,height*bg.naturalWidth/strip),offset=(w-width)*clamp(mode==='menu'?.36:cam/end,0,1);g.drawImage(bg,0,level*strip+1,bg.naturalWidth,strip-2,-offset,0,w,height)}const shade=g.createLinearGradient(0,height*.6,0,height);shade.addColorStop(0,'#10171300');shade.addColorStop(1,'#17201a88');g.fillStyle=shade;g.fillRect(0,0,width,height)}
+const sceneryCache=new Map();
+function sceneryLayer(n){
+ if(sceneryCache.has(n))return sceneryCache.get(n);
+ const tile=document.createElement('canvas'),strip=bg.naturalHeight/3;
+ tile.height=150;tile.width=Math.round(tile.height*bg.naturalWidth/strip);
+ const ctx=tile.getContext('2d');
+ ctx.drawImage(bg,0,n*strip+1,bg.naturalWidth,strip-2,0,0,tile.width,tile.height);
+ const pixels=ctx.getImageData(0,0,tile.width,tile.height);
+ for(let i=0;i<pixels.data.length;i+=4)for(let k=0;k<3;k++)pixels.data[i+k]=Math.round(pixels.data[i+k]/12)*12;
+ ctx.putImageData(pixels,0,0);sceneryCache.set(n,tile);return tile
+}
+function background(){
+ g.fillStyle=missions[level][2];g.fillRect(0,0,width,height);
+ const pixel=Math.max(2,Math.round(height/165));
+ if(bg.complete&&bg.naturalWidth){
+ const tile=sceneryLayer(level),scale=Math.max(pixel,Math.ceil(width/tile.width),Math.ceil(height/tile.height));
+ const w=tile.width*scale,h=tile.height*scale,travel=Math.max(1,end-width/zoom+120);
+ const progress=mode==='menu'?.34:clamp(cam/travel,0,1);
+ g.save();g.imageSmoothingEnabled=false;g.drawImage(tile,-Math.round((w-width)*progress/scale)*scale,height-h,w,h);g.restore()
+ }
+ if(mode==='menu')return;
+ // Mid-distance objects share the same ground plane and scroll more quickly than the skyline.
+ g.save();g.translate(0,Math.round(height*.82));g.scale(zoom,zoom);
+ const scroll=Math.round(cam*.48/2)*2,spacing=[132,190,172][level];
+ for(let i=Math.floor(scroll/spacing)-1;i<=(scroll+width/zoom)/spacing+1;i++){
+ const x=i*spacing-scroll,variant=((i%3)+3)%3;
+ if(level===0){
+ for(let j=0;j<4;j++){rect(x+j*12,-20,10,20,'#544e3c');rect(x+j*12,-20,2,20,'#867858')}
+ for(let row=0;row<2;row++)for(let j=0;j<3;j++){let bx=x+j*16+row*5;rect(bx,-26-row*6,14,6,'#77745a');rect(bx+2,-26-row*6,10,2,'#9b9373')}
+ }else if(level===1){
+ rect(x,-76,4,76,'#43494a');rect(x,-76,18,4,'#484b48');rect(x+12,-72,8,8,'#bca77d');
+ rect(x+48,-16,38,4,'#6c5749');rect(x+50,-12,4,12,'#494841');rect(x+80,-12,4,12,'#494841');rect(x+48,-24,38,4,'#756355')
+ }else{
+ let ht=variant===1?48:26;rect(x,-ht,68,ht,['#665b4f','#465863','#596355'][variant]);rect(x,-ht,68,3,'#90948a');for(let j=5;j<65;j+=7)rect(x+j,-ht+4,2,ht-6,'#303c404d');
+ rect(x+84,-54,3,54,'#41494a');rect(x+81,-56,9,4,'#c5ad7c')
+ }}
+ g.restore()
+}
 function soldier(a,hero){if(a.y>=floor-1)ellipse(a.x,floor+1,15,2.6,'#12181345');let moving=hero?Math.abs(a.vx)>8:true,frame=moving?Math.floor(a.walk)%4:0;g.save();g.translate(a.x,a.y);g.scale(a.dir,hero&&a.duck?.59:1);if(!hero&&a.hp<=0){let t=1-a.dead/.65;g.rotate(-t*1.45);g.globalAlpha=1-t}if(hero&&p.safe>0)g.globalAlpha=.55+.4*Math.abs(Math.sin(clock*20));let heavy=!hero&&a.role===3,sz=heavy?62:hero?61:56;
  const theme=hero?['#424a36','#76795a','#a4a283']:[['#373d39','#646b60','#868c7d'],['#373b3e','#596365','#7b8585'],['#494634','#847b52','#a89a69'],['#343a3d','#565e60','#929795'],['#494737','#6d694f','#938969']][a.role];
  const phase=moving?a.walk*2.8:0,step=moving?Math.sin(phase):.15,air=hero&&!p.ground,bob=moving?Math.cos(phase*2)*.9:0;
