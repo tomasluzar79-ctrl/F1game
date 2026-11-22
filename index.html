@@ -163,12 +163,68 @@ function mirrors(){
 function opponent(x,y,s,r){
  if(!rearView.complete||!rearView.naturalWidth){car(x,y,s*.021,r.c);return}
  const width=s*2.05,height=width*rearView.naturalHeight/rearView.naturalWidth;
+ if(track===2){g.save();g.translate(x,y);g.scale(1,-.54);g.globalAlpha=.18;g.drawImage(teamCar(r)||rearView,-width/2,-height,width,height);g.restore()}
  g.fillStyle='#17191c66';g.beginPath();g.ellipse(x,y,width*.52,height*.14,0,0,7);g.fill();
  g.drawImage(teamCar(r)||rearView,x-width/2,y-height,width,height);
  if(track===2&&s>.9){g.save();g.globalAlpha=.21;g.drawImage(plume,x-width*.86,y-height*.3,width*1.72,height*.57);g.restore()}
  g.fillStyle=r.c;g.fillRect(x-width*.18,y-height*.38,width*.36,Math.max(1,height*.038))
 }
 function hill(s){if(track!==2)return 0;let f=mod(s,length)/length;return 18*Math.sin(f*6.283)+14*Math.tanh((f-.13)*55)-14*Math.tanh((f-.36)*15)+5*Math.sin(f*25.13)}
+const visorView=new Image(),panoramas=new Image();
+visorView.src='assets/onboard.png';panoramas.src='assets/horizons.png';
+function trackLight(a,b,half,n){
+ const world=n*5,fraction=mod(world,length)/length;
+ function patch(left,right,farLeft,farRight,color){
+ poly(color,[a.x+farLeft*a.s,a.y],[a.x+farRight*a.s,a.y],[b.x+right*b.s,b.y+.5],[b.x+left*b.s,b.y+.5])
+ }
+ if(track===0){
+ const shadow=t=>Math.sin(t*.082)+.53*Math.sin(t*.17+.4)+.31*Math.sin(t*.31);
+ const x=half*(.47+.48*shadow(world)),next=half*(.47+.48*shadow(world+5));
+ patch(x,half+1,next,half+1,'#15283135');
+ patch(x-.48,x,next-.48,next,'#263b3930');
+ }else if(track===2){
+ const wave=t=>.72*Math.sin(t*.025)+.23*Math.cos(t*.083);
+ for(const side of [-1,1]){const x=side*(half-1.8)+wave(world),next=side*(half-1.8)+wave(world+5);
+ patch(x-.24,x+.24,next-.24,next+.24,'#c3d5db46');
+ patch(x-.68,x+.63,next-.68,next+.63,'#b1c8d322')}
+ }else{
+ const brightness=Math.max(0,1-mod(n,8)/8),alpha=(.025+.13*brightness).toFixed(3);
+ patch(-half+.3,-half+1.2,-half+.45,-half+1.35,'rgba(254,199,113,'+alpha+')')
+ }
+ if(track!==1&&fraction>.12&&fraction<.17){
+ patch(-half-6,-half-1,-half-6,-half-1,n%3?'#b6a78e':'#bcad94')
+ }
+}
+function tunnelSlice(a,b,n,width){
+ if(track!==1)return;
+ const f=mod(n*5,length)/length;if(f<.43||f>.56)return;
+ const half=width+2.5,height=4.8;
+ function face(side){const x1=a.x+side*half*a.s,x2=b.x+side*half*b.s;
+ poly(n%2?'#3e4147':'#414449',[x1,a.y],[x2,b.y],[x2,b.y-height*b.s],[x1,a.y-height*a.s]);
+ poly('#c69a68',[x1,a.y-1.05*a.s],[x2,b.y-1.05*b.s],[x2,b.y-1.12*b.s],[x1,a.y-1.12*a.s])}
+ face(-1);face(1);
+ poly(n%3?'#292c31':'#303339',[a.x-half*a.s,a.y-height*a.s],[a.x+half*a.s,a.y-height*a.s],[b.x+half*b.s,b.y-height*b.s],[b.x-half*b.s,b.y-height*b.s]);
+ if(n%3===0){for(const side of [-1,1]){let x=b.x+side*(half-.75)*b.s,y=b.y-height*b.s;g.fillStyle='#fff1cb';g.fillRect(x-b.s*.24,y,.48*b.s,Math.max(1,b.s*.075))}}
+}
+const cockpitPaint=new Map();
+function litCockpit(){
+ if(track===0)return visorView;
+ if(!cockpitPaint.has(track)){
+ const w=Math.min(1280,visorView.naturalWidth),tile=surface(w,Math.max(1,Math.round(w*visorView.naturalHeight/visorView.naturalWidth))),c=tile.getContext('2d');
+ c.drawImage(visorView,0,0,tile.width,tile.height);c.globalCompositeOperation='source-atop';
+ const light=c.createLinearGradient(0,0,w,tile.height);
+ light.addColorStop(0,track===1?'#1929439c':'#566e8c44');light.addColorStop(.6,track===1?'#15223b85':'#6a849a23');light.addColorStop(1,track===1?'#bc976039':'#76839828');c.fillStyle=light;c.fillRect(0,0,w,tile.height);cockpitPaint.set(track,tile)
+ }return cockpitPaint.get(track)
+}
+function onboard(){
+ if(!visorView.complete||!visorView.naturalWidth){cockpit();mirrors();return}
+ // Frame the nose and front wheels together on both landscape and portrait displays.
+ const w=Math.min(W*1.08,H*1.6),h=Math.min(H*.42,w*.54),jolt=Math.abs(lane)>.95?Math.sin(dist*2)*Math.min(speed/55,1)*2:0;
+ g.save();g.translate(W*.5+bodyYaw*w*.03,H+2+jolt);g.rotate(bodyYaw*.018);
+ g.drawImage(litCockpit(),-w*.5,-h,w,h);
+ g.restore();mirrors()
+}
+
 function draw(){
  horizon=H*(.43+Math.sin(dist*.46)*Math.min(speed/90,1)*.0009);sky();let focal=Math.min(W*.88,H*1.07),base=W*(.5-bodyYaw*.15),roadWidth=track===1?5.8:8,step=5,offset=mod(dist,step),samples=[],bend=0,bx=0,camHill=hill(dist),fraction=mod(dist,length)/length,tunnel=track===1&&fraction>.43&&fraction<.56;
  // Anchor road markings to the circuit and always keep a near clipping plane.
@@ -185,21 +241,21 @@ function draw(){
  }
  for(let i=samples.length-1;i>0;i--){let a=samples[i],b=samples[i-1],n=b.n;const band=(lo,hi,c)=>poly(c,[a.x+lo*a.s,a.y],[a.x+hi*a.s,a.y],[b.x+hi*b.s,b.y+.6],[b.x+lo*b.s,b.y+.6]);
  band(-roadWidth-1,roadWidth+1,Math.floor(n/2)%2?'#bc463b':'#e3dfd4');
- roadSurface(a,b,roadWidth);trackDetails(a,b,band,roadWidth,n);
+ roadSurface(a,b,roadWidth);trackLight(a,b,roadWidth,n);trackDetails(a,b,band,roadWidth,n);
  for(const side of [-1,1]){
  const k=side*(roadWidth-.16);band(k-.055,k+.055,'#ebe8da');
  if(i>1&&mod(n,4)===0)realScenery(b.x+side*(roadWidth+6+mod(n,3))*b.s,b.y,b.s,n,side);
  rail(a,b,side*(roadWidth+2))
  }
  if(mod(n,Math.round(length/step))===0){for(let k=0;k<14;k++)band(-roadWidth+2*roadWidth*k/14,-roadWidth+2*roadWidth*(k+1)/14,k%2?'#e9e9df':'#23262a')}
+ tunnelSlice(a,b,n,roadWidth);
  for(const {r,z} of rivalDepths){if(z<b.z||z>=a.z||z<3)continue;
   const scale=focal/z,t=(scale-b.s)/(a.s-b.s);
   opponent(mix(b.x,a.x,t)+r.l*roadWidth*scale,mix(b.y,a.y,t),scale,r);
  }
  }
- if(tunnel){g.fillStyle=gradient(0,horizon,[[0,'#0a1119'],[.8,'#26313a'],[1,'#48515a']]);g.fillRect(0,0,W,horizon*.85);for(let i=1;i<8;i++){let t=mod(i+dist/28,8)/8;g.fillStyle='#ffeac0';g.fillRect(W*(.5-.49*t),horizon*(.86-.9*t),3+t*17,1+4*t)}}
  if(track===1){g.fillStyle='#131c4536';g.fillRect(0,horizon,W,H-horizon)}
- rain();cockpit();mirrors()
+ onboard();rain()
 }
 
 let gear=1,rpm=0,loadOnEngine=0,draft=0,lapStart=0,lapTimes=[],bestLap=0,lapFlash=0;
@@ -287,7 +343,11 @@ function atmosphere(){
 function sky(){
  g.fillStyle=['#778659','#354956','#5a7055'][track];g.fillRect(0,0,W,H);
  const shift=Math.sin(dist/690)*W*.045;
- g.drawImage(atmosphere(),-W*.07+shift,0,W*1.14,horizon+9)
+ if(panoramas.complete&&panoramas.naturalWidth){
+ const section=panoramas.naturalHeight/3;
+ const outH=horizon+10,outW=Math.max(W*1.14,outH*panoramas.naturalWidth/(section-4));
+ g.drawImage(panoramas,0,track*section+2,panoramas.naturalWidth,section-4,(W-outW)*.5+shift,0,outW,outH);
+ }else g.drawImage(atmosphere(),-W*.07+shift,0,W*1.14,horizon+9)
 }
 const rainSeeds=Array.from({length:66},(_,i)=>({x:((i*307)%997)/997,y:((i*281)%587)/587}));
 function rain(){
@@ -308,7 +368,7 @@ function teamCar(r){
 }
 function trackDetails(a,b,band,width,n){
  const bend=turn(dist+b.z),wet=track===2;
- if(wet){band(-width,width,'#a9bfd21b');if(n%9===1)band(-width*.62,-width*.33,'#c5d7dd38')}
+ if(wet)band(-width,width,'#a9bfd21b');
  const side=Math.sign(bend),offset=side*Math.min(width*.48,Math.abs(bend)*width*16);
  if(Math.abs(bend)>.003){band(offset-.95,offset-.68,'#16191c2c');band(offset+.68,offset+.95,'#16191c2c')}
  if(n%8!==0||b.z<4||b.z>200)return;
